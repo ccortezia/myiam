@@ -1,2 +1,0 @@
-# myiam
-IAM Backend Prototype
