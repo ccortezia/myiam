@@ -1,6 +1,6 @@
 import * as cdk from '@aws-cdk/core';
 
-export class MyiamCdkStack extends cdk.Stack {
+export class MyIamCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
