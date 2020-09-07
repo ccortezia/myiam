@@ -54,9 +54,10 @@ __all__ = (
     "describe_rule",
     "delete_rule",
     "delete_rules_by_sid",
-    "find_matching_action",
-    "find_matching_policies",
-    "find_matching_rules",
+    "find_action_matching_request",
+    "find_policy_names_matching_user",
+    "find_policy_names_matching_role",
+    "find_evaluation_rules",
     "calculate_allowance",
 )
 
@@ -424,9 +425,11 @@ def delete_rules_by_sid(table, policy_name, statement_id):
         KeyConditionExpression=Key("pk").eq(f"policy#{policy_name}")
         & Key("sk").begins_with(f"sid#{statement_id}#")
     )
+    rules = response.get("Items") or []
     with table.batch_writer() as batch:
-        for rule in (response.get("Items") or []):
+        for rule in rules:
             batch.delete_item(Key={"pk": rule["pk"], "sk": rule["sk"]})
+    return rules
 
 
 def delete_rule(table, policy_name, statement_id, rule_id):
@@ -438,28 +441,37 @@ def delete_rule(table, policy_name, statement_id, rule_id):
 # --------------------------------------------------------------------------------------------------
 
 
-def find_matching_action(table, access_context):
+def find_action_matching_request(table, request):
     # This function determines the name of the action attempted given an access context
     raise NotImplementedError()
 
 
-def find_matching_policies(table, user, role):
+def find_policy_names_matching_user(table, user):
     # TODO: automatically add group policies group members (and mark the association
     #  as special+indirect) so querying for user policies also returns policies
     # indirectly associated with user from the groups he/she is associated.
     result = table.query(KeyConditionExpression=Key("pk").eq(f"user#{user}"))
     user_policies = result["Items"]
-    result = table.query(KeyConditionExpression=Key("pk").eq(f"role#{role}"))
-    role_policies = result["Items"]
     policies = [
         item["sk"].split("#")[1]
-        for item in user_policies + role_policies
+        for item in user_policies
         if item["sk"].startswith("policy#")
     ]
     return sorted(set(policies))
 
 
-def find_matching_rules(table, action_name, resource_name, policy_names, context):
+def find_policy_names_matching_role(table, role):
+    result = table.query(KeyConditionExpression=Key("pk").eq(f"role#{role}"))
+    role_policies = result["Items"]
+    policies = [
+        item["sk"].split("#")[1]
+        for item in role_policies
+        if item["sk"].startswith("policy#")
+    ]
+    return sorted(set(policies))
+
+
+def find_evaluation_rules(table, action_name, resource_name, policy_names, context):
     def _matches_predicate(item, context):
         predicate_fn = item["rule_condition"]
         if not predicate_fn:
