@@ -1,7 +1,10 @@
+import pytest
 from myiam.api import create_action, update_action, create_policy
-from myiam.stream_lambda import handle_stream_event
 from .ddbs_utils import get_new_events
 
+
+# NOTE: These tests will be moved to whatever project hosts the stream lambdas.
+pytestmark = pytest.mark.skip
 
 def test_stream_1(ddbt, dynamodbstreams):
 
@@ -28,8 +31,7 @@ def test_stream_2(ddbt, dynamodbstreams, generic_policy):
     events, new_it = get_new_events(ddbt, dynamodbstreams)
     print(events)
 
-    import pudb; pudb.set_trace()
-    handle_stream_event({"Records": events}, None)
+    handle({"Records": events}, None)
 
-    # print(describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001"))
-    # print(describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001"))
+    print(describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001"))
+    print(describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001"))
