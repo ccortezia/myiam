@@ -6,6 +6,7 @@ from .ddbs_utils import get_new_events
 # NOTE: These tests will be moved to whatever project hosts the stream lambdas.
 pytestmark = pytest.mark.skip
 
+
 def test_stream_1(ddbt, dynamodbstreams):
 
     create_action(ddbt, action_name="batch:SubmitJob")
@@ -18,7 +19,7 @@ def test_stream_1(ddbt, dynamodbstreams):
     events, new_it = get_new_events(ddbt, dynamodbstreams, iterator=new_it)
     print(events)
 
-    update_action(ddbt, action_name="batch:SubmitJob", metavar=444, newattr={'expression': 899})
+    update_action(ddbt, action_name="batch:SubmitJob", metavar=444, newattr={"expression": 899})
 
     events, new_it = get_new_events(ddbt, dynamodbstreams, iterator=new_it)
     print(events)

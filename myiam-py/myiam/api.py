@@ -453,9 +453,7 @@ def find_policy_names_matching_user(table, user):
     result = table.query(KeyConditionExpression=Key("pk").eq(f"user#{user}"))
     user_policies = result["Items"]
     policies = [
-        item["sk"].split("#")[1]
-        for item in user_policies
-        if item["sk"].startswith("policy#")
+        item["sk"].split("#")[1] for item in user_policies if item["sk"].startswith("policy#")
     ]
     return sorted(set(policies))
 
@@ -464,9 +462,7 @@ def find_policy_names_matching_role(table, role):
     result = table.query(KeyConditionExpression=Key("pk").eq(f"role#{role}"))
     role_policies = result["Items"]
     policies = [
-        item["sk"].split("#")[1]
-        for item in role_policies
-        if item["sk"].startswith("policy#")
+        item["sk"].split("#")[1] for item in role_policies if item["sk"].startswith("policy#")
     ]
     return sorted(set(policies))
 

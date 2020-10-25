@@ -18,7 +18,7 @@ from myiam import (
 
 def test_create_group(ddbt):
     create_group(ddbt, group_name="sales", human_name="Sales")
-    groups = list_groups(ddbt,)
+    groups = list_groups(ddbt)
     print(groups)
 
 
