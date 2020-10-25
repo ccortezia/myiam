@@ -1,0 +1,4 @@
+connexion[swagger-ui]==2.7.0
+python-dotenv==0.14.0
+apig-wsgi==2.9.2
+../myiam-py
