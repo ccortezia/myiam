@@ -49,6 +49,7 @@ def test_find_policy_names_matching_role(ddbt, generic_policy):
     policies = find_policy_names_matching_role(ddbt, "sales")
     assert policies == ["PolicyY", "PolicyZ"]
 
+
 def test_find_matching_rules(ddbt):
     create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001", "db:FetchRows", "allow")
     create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "002", "db:FetchCells", "allow")

@@ -12,7 +12,9 @@ def dynamodb():
 
 @pytest.fixture(scope="session")
 def dynamodbstreams():
-    return boto3.client("dynamodbstreams", region_name="localhost", endpoint_url="http://localhost:8000")
+    return boto3.client(
+        "dynamodbstreams", region_name="localhost", endpoint_url="http://localhost:8000"
+    )
 
 
 @pytest.fixture(scope="function")

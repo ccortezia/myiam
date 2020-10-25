@@ -1,0 +1,385 @@
+openapi: 3.0.0
+servers:
+  - description: MyIAM API
+    url: /1.0.0
+info:
+  description: MyIAM Data Administration API
+  version: "1.0.0"
+  title: MyIAM API
+paths:
+  /list_users:
+    get:
+      operationId: myiam_api.handlers.list_users
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /create_user:
+    get:
+      operationId: myiam_api.handlers.create_user
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /describe_user:
+    get:
+      operationId: myiam_api.handlers.describe_user
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user:
+    get:
+      operationId: myiam_api.handlers.update_user
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user_add_to_groups:
+    get:
+      operationId: myiam_api.handlers.update_user_add_to_groups
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user_remove_from_groups:
+    get:
+      operationId: myiam_api.handlers.update_user_remove_from_groups
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user_attach_policies:
+    get:
+      operationId: myiam_api.handlers.update_user_attach_policies
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user_detach_policies:
+    get:
+      operationId: myiam_api.handlers.update_user_detach_policies
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user_create_tag:
+    get:
+      operationId: myiam_api.handlers.update_user_create_tag
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user_update_tag:
+    get:
+      operationId: myiam_api.handlers.update_user_update_tag
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_user_delete_tag:
+    get:
+      operationId: myiam_api.handlers.update_user_delete_tag
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /delete_user:
+    get:
+      operationId: myiam_api.handlers.delete_user
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /list_groups:
+    get:
+      operationId: myiam_api.handlers.list_groups
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /create_group:
+    get:
+      operationId: myiam_api.handlers.create_group
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /describe_group:
+    get:
+      operationId: myiam_api.handlers.describe_group
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group:
+    get:
+      operationId: myiam_api.handlers.update_group
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group_add_users:
+    get:
+      operationId: myiam_api.handlers.update_group_add_users
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group_remove_users:
+    get:
+      operationId: myiam_api.handlers.update_group_remove_users
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group_attach_policies:
+    get:
+      operationId: myiam_api.handlers.update_group_attach_policies
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group_detach_policies:
+    get:
+      operationId: myiam_api.handlers.update_group_detach_policies
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group_create_inline_policy:
+    get:
+      operationId: myiam_api.handlers.update_group_create_inline_policy
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group_update_inline_policy:
+    get:
+      operationId: myiam_api.handlers.update_group_update_inline_policy
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_group_delete_inline_policy:
+    get:
+      operationId: myiam_api.handlers.update_group_delete_inline_policy
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /delete_group:
+    get:
+      operationId: myiam_api.handlers.delete_group
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /list_roles:
+    get:
+      operationId: myiam_api.handlers.list_roles
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /create_role:
+    get:
+      operationId: myiam_api.handlers.create_role
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /describe_role:
+    get:
+      operationId: myiam_api.handlers.describe_role
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role:
+    get:
+      operationId: myiam_api.handlers.update_role
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role_attach_policies:
+    get:
+      operationId: myiam_api.handlers.update_role_attach_policies
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role_detach_policies:
+    get:
+      operationId: myiam_api.handlers.update_role_detach_policies
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role_trust_policy:
+    get:
+      operationId: myiam_api.handlers.update_role_trust_policy
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role_permission_boundary:
+    get:
+      operationId: myiam_api.handlers.update_role_permission_boundary
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role_create_tag:
+    get:
+      operationId: myiam_api.handlers.update_role_create_tag
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role_update_tag:
+    get:
+      operationId: myiam_api.handlers.update_role_update_tag
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_role_delete_tag:
+    get:
+      operationId: myiam_api.handlers.update_role_delete_tag
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /delete_role:
+    get:
+      operationId: myiam_api.handlers.delete_role
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /list_policies:
+    get:
+      operationId: myiam_api.handlers.list_policies
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /create_policy:
+    get:
+      operationId: myiam_api.handlers.create_policy
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /describe_policy:
+    get:
+      operationId: myiam_api.handlers.describe_policy
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_policy_set_default_version:
+    get:
+      operationId: myiam_api.handlers.update_policy_set_default_version
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /delete_policy_version:
+    get:
+      operationId: myiam_api.handlers.delete_policy_version
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /delete_policy:
+    get:
+      operationId: myiam_api.handlers.delete_policy
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /list_actions:
+    get:
+      operationId: myiam_api.handlers.list_actions
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /create_action:
+    get:
+      operationId: myiam_api.handlers.create_action
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /describe_action:
+    get:
+      operationId: myiam_api.handlers.describe_action
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_action:
+    get:
+      operationId: myiam_api.handlers.update_action
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /delete_action:
+    get:
+      operationId: myiam_api.handlers.delete_action
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported

@@ -9,7 +9,7 @@ from myiam import (
 
 def test_create_action(ddbt):
     create_action(ddbt, action_name="batch:SubmitJob")
-    actions = list_actions(ddbt,)
+    actions = list_actions(ddbt)
     print(actions)
 
 

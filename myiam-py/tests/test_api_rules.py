@@ -1,5 +1,11 @@
 import pytest
-from myiam import create_rule, describe_rule, delete_rule, delete_rules_by_sid, convert_policy_statement_into_rules
+from myiam import (
+    create_rule,
+    describe_rule,
+    delete_rule,
+    delete_rules_by_sid,
+    convert_policy_statement_into_rules,
+)
 
 
 def test_create_rule(ddbt):

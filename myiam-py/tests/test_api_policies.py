@@ -10,7 +10,7 @@ from myiam import (
 
 def test_create_policy(ddbt, generic_policy):
     create_policy(ddbt, policy_name="SalesDataReadOnly", **generic_policy)
-    policys = list_policies(ddbt,)
+    policys = list_policies(ddbt)
     print(policys)
 
 
