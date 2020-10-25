@@ -33,7 +33,7 @@ export class MyIamCdkStack extends cdk.Stack {
 
     const streamHandler = new lambda.Function(this, "MyIamDdbStreamHandler", {
       functionName: "MyIamDdbStreamHandler",
-      code: lambda.Code.asset("resources/lambdas"),
+      code: lambda.Code.fromAsset("resources/lambdas"),
       handler: "ddb_stream_handler.handle",
       runtime: lambda.Runtime.PYTHON_3_7,
       initialPolicy: [
@@ -46,10 +46,8 @@ export class MyIamCdkStack extends cdk.Stack {
       ]
     })
 
-    const dynamoDbStreamSource = new lambdaEventSources.DynamoEventSource(table, {
+    streamHandler.addEventSource(new lambdaEventSources.DynamoEventSource(table, {
       startingPosition: lambda.StartingPosition.LATEST
-    })
-
-    streamHandler.addEventSource(dynamoDbStreamSource)
+    }))
   }
 }
