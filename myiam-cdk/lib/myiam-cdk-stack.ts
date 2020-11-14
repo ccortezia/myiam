@@ -36,7 +36,7 @@ export class MyIamCdkStack extends cdk.Stack {
       functionName: "MyIamDdbStreamHandler",
       code: lambda.Code.fromAsset("resources/lambdas"),
       handler: "ddb_stream_handler.handle",
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: lambda.Runtime.PYTHON_3_8,
       initialPolicy: [
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
@@ -54,7 +54,7 @@ export class MyIamCdkStack extends cdk.Stack {
     // NOTE: temporarily here for experimental purposes.
     const apiLayer = new lambda.LayerVersion(this, "MyIamApiLayer", {
       layerVersionName: "myiam-api",
-      compatibleRuntimes: [lambda.Runtime.PYTHON_3_7],
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_8],
       code: new lambda.AssetCode("resources/layers/myiam_api/build/layer.zip")
     })
 
@@ -62,7 +62,7 @@ export class MyIamCdkStack extends cdk.Stack {
       functionName: "MyIamAdminApiHandler",
       code: lambda.Code.fromAsset("resources/lambdas/api"),
       handler: "handler.handle",
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: lambda.Runtime.PYTHON_3_8,
       layers: [apiLayer],
       initialPolicy: [
         new iam.PolicyStatement({
@@ -76,7 +76,7 @@ export class MyIamCdkStack extends cdk.Stack {
 
     const authorizerLambda = new lambda.Function(this, "MyIamApiAuthorizerLambda", {
       functionName: "MyIamApiAuthorizerLambda",
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: lambda.Runtime.PYTHON_3_8,
       code: lambda.Code.fromAsset('resources/lambdas/authorizer'),
       handler: "handler.handle",
       initialPolicy: [
