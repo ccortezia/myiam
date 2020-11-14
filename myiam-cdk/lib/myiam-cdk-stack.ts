@@ -41,8 +41,8 @@ export class MyIamCdkStack extends cdk.Stack {
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
           effect: iam.Effect.ALLOW,
-          actions: ["dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem"],
-          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam"]
+          actions: ["dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"],
+          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam*"]
         })
       ]
     })
