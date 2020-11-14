@@ -34,8 +34,8 @@ export class MyIamCdkStack extends cdk.Stack {
 
     const streamHandler = new lambda.Function(this, "MyIamDdbStreamHandler", {
       functionName: "MyIamDdbStreamHandler",
-      code: lambda.Code.fromAsset("resources/lambdas"),
-      handler: "ddb_stream_handler.handle",
+      code: lambda.Code.fromAsset("resources/lambdas/ddb_stream_handler"),
+      handler: "handler.handle",
       runtime: lambda.Runtime.PYTHON_3_8,
       initialPolicy: [
         new iam.PolicyStatement({
