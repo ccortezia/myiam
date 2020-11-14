@@ -15,7 +15,7 @@ HTTP_EVENT = {
         "x-amzn-trace-id": "Root=1-5f6f3806-c27d7a4e4d55f9667355ff90",
         "x-forwarded-for": "200.160.93.27",
         "x-forwarded-port": "443",
-        "x-forwarded-proto": "https"
+        "x-forwarded-proto": "https",
     },
     "requestContext": {
         "accountId": "583723262561",
@@ -27,15 +27,15 @@ HTTP_EVENT = {
             "path": "/1.0.0/list_users",
             "protocol": "HTTP/1.1",
             "sourceIp": "200.160.93.27",
-            "userAgent": "insomnia/2020.2.1"
+            "userAgent": "insomnia/2020.2.1",
         },
         "requestId": "TeWxCh5bIAMEMGA=",
         "routeKey": "$default",
         "stage": "$default",
         "time": "26/Sep/2020:12:45:58 +0000",
-        "timeEpoch": 1601124358509
+        "timeEpoch": 1601124358509,
     },
-    "isBase64Encoded": False
+    "isBase64Encoded": False,
 }
 
 
@@ -50,30 +50,16 @@ REST_EVENT = {
         "X-Amzn-Trace-Id": "Root=1-5f6f3fc3-ba95f6a14e47a8c40ee1b0e2",
         "X-Forwarded-For": "200.160.93.27",
         "X-Forwarded-Port": "443",
-        "X-Forwarded-Proto": "https"
+        "X-Forwarded-Proto": "https",
     },
     "multiValueHeaders": {
-        "accept": [
-            "*/*"
-        ],
-        "Host": [
-            "1n5kn8pmq8.execute-api.us-east-1.amazonaws.com"
-        ],
-        "User-Agent": [
-            "insomnia/2020.2.1"
-        ],
-        "X-Amzn-Trace-Id": [
-            "Root=1-5f6f3fc3-ba95f6a14e47a8c40ee1b0e2"
-        ],
-        "X-Forwarded-For": [
-            "200.160.93.27"
-        ],
-        "X-Forwarded-Port": [
-            "443"
-        ],
-        "X-Forwarded-Proto": [
-            "https"
-        ]
+        "accept": ["*/*"],
+        "Host": ["1n5kn8pmq8.execute-api.us-east-1.amazonaws.com"],
+        "User-Agent": ["insomnia/2020.2.1"],
+        "X-Amzn-Trace-Id": ["Root=1-5f6f3fc3-ba95f6a14e47a8c40ee1b0e2"],
+        "X-Forwarded-For": ["200.160.93.27"],
+        "X-Forwarded-Port": ["443"],
+        "X-Forwarded-Proto": ["https"],
     },
     "queryStringParameters": None,
     "multiValueQueryStringParameters": None,
@@ -104,13 +90,13 @@ REST_EVENT = {
             "cognitoAuthenticationProvider": None,
             "userArn": None,
             "userAgent": "insomnia/2020.2.1",
-            "user": None
+            "user": None,
         },
         "domainName": "1n5kn8pmq8.execute-api.us-east-1.amazonaws.com",
-        "apiId": "1n5kn8pmq8"
+        "apiId": "1n5kn8pmq8",
     },
     "body": None,
-    "isBase64Encoded": False
+    "isBase64Encoded": False,
 }
 
 
