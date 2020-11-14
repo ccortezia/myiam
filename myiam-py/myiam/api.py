@@ -49,6 +49,12 @@ __all__ = (
     "describe_action",
     "update_action",
     "delete_action",
+    "create_route_domain",
+    "describe_route_domain",
+    "delete_route_domain",
+    "list_routes",
+    "create_route",
+    "delete_route",
     "convert_policy_statement_into_rules",
     "create_rule",
     "describe_rule",
@@ -355,6 +361,50 @@ def delete_action(table, action_name):
     with table.batch_writer() as batch:
         for pk, sk in [(item["pk"], item["sk"]) for item in response["Items"]]:
             batch.delete_item(Key={"pk": pk, "sk": sk})
+
+
+# --------------------------------------------------------------------------------------------------
+# ROUTES
+# --------------------------------------------------------------------------------------------------
+
+
+def create_route_domain(table, route_domain, **attrs):
+    table.put_item(
+        Item={"pk": f"route_domain#{route_domain}", "sk": "route_domain#attributes", **attrs},
+        ConditionExpression=Attr("pk").not_exists(),
+    )
+
+
+def describe_route_domain(table, route_domain):
+    response = table.query(KeyConditionExpression=Key("pk").eq(f"route_domain#{route_domain}"))
+    return response.get("Items") or []
+
+
+def delete_route_domain(table, route_domain):
+    response = table.query(KeyConditionExpression=Key("pk").eq(f"route_domain#{route_domain}"))
+    with table.batch_writer() as batch:
+        for pk, sk in [(item["pk"], item["sk"]) for item in response["Items"]]:
+            batch.delete_item(Key={"pk": pk, "sk": sk})
+
+
+def list_routes(table):
+    response = table.scan(FilterExpression=Attr("pk").begins_with("route_domain"))
+    return response["Items"]
+
+
+def create_route(table, route_domain, route_spec, action):
+    table.put_item(
+        Item={
+            "pk": f"route_domain#{route_domain}",
+            "sk": f"route_spec#{route_spec}",
+            "action": action,
+        },
+        ConditionExpression=Attr("pk").not_exists() & Attr("sk").not_exists(),
+    )
+
+
+def delete_route(table, route_domain, route_spec):
+    table.delete_item(Key={"pk": f"route_domain#{route_domain}", "sk": f"route_spec#{route_spec}"})
 
 
 # --------------------------------------------------------------------------------------------------
