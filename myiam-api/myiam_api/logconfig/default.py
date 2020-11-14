@@ -1,40 +1,31 @@
-import os
-
-
 LOGGING = {
-    'version': 1,
-    'formatters': {
-        'simple': {
-            'format': '[%(levelname)-7s][%(asctime)s][%(threadName)s][%(name)s] %(message)s'
+    "version": 1,
+    "formatters": {
+        "concise": {"format": "[%(levelname)-7s] %(message)s"},
+        "timestamped": {
+            "format": "[%(levelname)-7s][%(asctime)s][%(name)s] %(message)s"
         },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-            'level': 'DEBUG'
+    "handlers": {
+        "stream": {
+            "class": "logging.StreamHandler",
+            "formatter": "timestamped",
         },
-        'null': {
-            'class': 'logging.NullHandler',
-            'formatter': 'simple',
-            'level': 'DEBUG'
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "concise",
         },
-        'file': {
-            'class': 'logging.NullHandler',
-            'formatter': 'simple',
-            'level': 'DEBUG'
-        }
+        "null": {
+            "class": "logging.NullHandler",
+            "formatter": "timestamped",
+        },
     },
-    'root': {
-        'level': 'DEBUG',
-        'handlers': ['console']
+    "root": {"level": "DEBUG", "handlers": ["stream"]},
+    "loggers": {
+        "boto3": {"level": "ERROR"},
+        "werkzeug": {"level": "DEBUG"},
+        "sqlalchemy": {"level": "ERROR"},
+        "myiam_api": {"level": "ERROR"},
+        "myiam_api.cli": {"level": "INFO", "handlers": ["console"], "propagate": False},
     },
-    'loggers': {
-        'gunicorn.error':     {'propagate': False, 'level': 'DEBUG', 'handlers': ['console']},
-        'gunicorn.access':    {'propagate': False, 'level': 'DEBUG', 'handlers': ['null']},
-        'werkzeug':           {'propagate': False, 'level': 'DEBUG', 'handlers': ['console']},
-        'sqlalchemy':         {'propagate': False, 'level': 'ERROR', 'handlers': ['console']},
-        'myiam_api':          {'propagate': False, 'level': 'DEBUG', 'handlers': ['console']},
-        'myiam_api.security': {'propagate': False, 'level': 'ERROR', 'handlers': ['console']},
-    }
 }

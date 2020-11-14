@@ -1,0 +1,6 @@
+- policy_name: FullRootAccess
+  statements:
+    - sid: AllowAllActions
+      actions: "*"
+      resources: "*"
+      effect: allow

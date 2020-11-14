@@ -34,15 +34,15 @@ export class MyIamCdkStack extends cdk.Stack {
 
     const streamHandler = new lambda.Function(this, "MyIamDdbStreamHandler", {
       functionName: "MyIamDdbStreamHandler",
-      code: lambda.Code.fromAsset("resources/lambdas"),
-      handler: "ddb_stream_handler.handle",
-      runtime: lambda.Runtime.PYTHON_3_7,
+      code: lambda.Code.fromAsset("resources/lambdas/ddb_stream_handler"),
+      handler: "handler.handle",
+      runtime: lambda.Runtime.PYTHON_3_8,
       initialPolicy: [
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
           effect: iam.Effect.ALLOW,
-          actions: ["dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem"],
-          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam"]
+          actions: ["dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"],
+          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam*"]
         })
       ]
     })
@@ -54,7 +54,7 @@ export class MyIamCdkStack extends cdk.Stack {
     // NOTE: temporarily here for experimental purposes.
     const apiLayer = new lambda.LayerVersion(this, "MyIamApiLayer", {
       layerVersionName: "myiam-api",
-      compatibleRuntimes: [lambda.Runtime.PYTHON_3_7],
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_8],
       code: new lambda.AssetCode("resources/layers/myiam_api/build/layer.zip")
     })
 
@@ -62,21 +62,21 @@ export class MyIamCdkStack extends cdk.Stack {
       functionName: "MyIamAdminApiHandler",
       code: lambda.Code.fromAsset("resources/lambdas/api"),
       handler: "handler.handle",
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: lambda.Runtime.PYTHON_3_8,
       layers: [apiLayer],
       initialPolicy: [
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
           effect: iam.Effect.ALLOW,
           actions: ["dynamodb:Scan", "dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem"],
-          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam"]
+          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam*"]
         })
       ]
     })
 
     const authorizerLambda = new lambda.Function(this, "MyIamApiAuthorizerLambda", {
       functionName: "MyIamApiAuthorizerLambda",
-      runtime: lambda.Runtime.PYTHON_3_7,
+      runtime: lambda.Runtime.PYTHON_3_8,
       code: lambda.Code.fromAsset('resources/lambdas/authorizer'),
       handler: "handler.handle",
       initialPolicy: [
@@ -84,7 +84,7 @@ export class MyIamCdkStack extends cdk.Stack {
           sid: "AllowLambdaToQueryDynamoDbTable",
           effect: iam.Effect.ALLOW,
           actions: ["dynamodb:Scan", "dynamodb:Query"],
-          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam"]
+          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam*"],
         })
       ]
     })
