@@ -15,8 +15,6 @@ def make_app():
     # Apply logging configuration.
     logging.config.dictConfig(app.app.config["LOGGING"])
 
-    @app.app.before_request
-    def before_request():
-        app.app.table = boto3.resource("dynamodb").Table("myiam")
+    app.app.table = boto3.resource("dynamodb").Table("myiam")
 
     return app.app
