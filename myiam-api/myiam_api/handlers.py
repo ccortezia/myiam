@@ -189,3 +189,19 @@ def update_action():
 
 def delete_action():
     return ("Procedure not yet supported", 404)
+
+
+def list_routes():
+    return myiam.list_routes(myiam_api.app.table)
+
+
+def create_route():
+    return ("Procedure not yet supported", 404)
+
+
+def update_route():
+    return ("Procedure not yet supported", 404)
+
+
+def delete_route():
+    return ("Procedure not yet supported", 404)

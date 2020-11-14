@@ -383,3 +383,35 @@ paths:
           description: Successful
         '500':
           description: Procedure not yet supported
+  /list_routes:
+    get:
+      operationId: myiam_api.handlers.list_routes
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /create_route:
+    get:
+      operationId: myiam_api.handlers.create_route
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /update_route:
+    get:
+      operationId: myiam_api.handlers.update_route
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
+  /delete_route:
+    get:
+      operationId: myiam_api.handlers.delete_route
+      responses:
+        '200':
+          description: Successful
+        '500':
+          description: Procedure not yet supported
