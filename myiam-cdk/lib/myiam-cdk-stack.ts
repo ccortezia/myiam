@@ -69,7 +69,7 @@ export class MyIamCdkStack extends cdk.Stack {
           sid: "AllowLambdaToQueryDynamoDbTable",
           effect: iam.Effect.ALLOW,
           actions: ["dynamodb:Scan", "dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem"],
-          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam"]
+          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam*"]
         })
       ]
     })
@@ -84,7 +84,7 @@ export class MyIamCdkStack extends cdk.Stack {
           sid: "AllowLambdaToQueryDynamoDbTable",
           effect: iam.Effect.ALLOW,
           actions: ["dynamodb:Scan", "dynamodb:Query"],
-          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam"]
+          resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam*"],
         })
       ]
     })
