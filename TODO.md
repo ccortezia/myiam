@@ -1,0 +1,55 @@
+# TODO
+
+- [ ] (proj) Add .github/PULL_REQUEST
+- [ ] (proj) Add "Getting Started" section to root README
+- [ ] (proj) Add "Contribute" section to root README
+- [ ] (myiam-py) Add function docstrings
+- [ ] (myiam-py) Type hints + mypy
+- [ ] (myiam-py) Implement test suite assertions
+- [ ] (myiam-py) CI - Automatic test running
+- [ ] (myiam-py) CI - Automatic coverage publishing
+- [ ] (myiam-py) Review README.md
+- [ ] (myiam-py) Rethink layers (outter OO layer?)
+- [ ] (myiam-py) Implement resource URI resolution
+- [ ] (myiam-py) Refactor action resolution (strategy injection)
+- [ ] (myiam-py) Implement group policy inheritance to group members
+- [ ] (myiam-py) Implement policy conditions
+- [ ] (myiam-py) Review table.batch_writer usage
+- [ ] (myiam-py) Review table.update_item versus table.put_item usage
+- [ ] (myiam-py) Review and document model versioning needs
+- [ ] (myiam-py) Implement wildcard expansion for policy actions
+- [ ] (myiam-py) Handle action-resource mismatches during rule compilation
+- [ ] (myiam-py) Implement update_user_create_tag
+- [ ] (myiam-py) Implement update_user_update_tag
+- [ ] (myiam-py) Implement update_user_delete_tag
+- [ ] (myiam-py) Implement update_group_attach_policies
+- [ ] (myiam-py) Implement update_group_detach_policies
+- [ ] (myiam-py) Implement update_group_create_inline_policy
+- [ ] (myiam-py) Implement update_group_update_inline_policy
+- [ ] (myiam-py) Implement update_group_delete_inline_policy
+- [ ] (myiam-py) Implement update_role_permission_boundary
+- [ ] (myiam-py) Implement update_role_create_tag
+- [ ] (myiam-py) Implement update_role_update_tag
+- [ ] (myiam-py) Implement update_role_delete_tag
+- [ ] (myiam-py) Implement update_policy_set_default_version
+- [ ] (myiam-py) Implement delete_policy_version
+- [ ] (myiam-py) Review uniqueness enforcement
+- [ ] (myiam-py) Enable dependabot
+- [ ] (myiam-py) Publish package to pypi
+- [ ] (myiam-py) Implement action documentation metadata enforcement
+- [ ] (myiam-cdk) Enable dependabot
+- [ ] (myiam-cdk) Export reusable parts as independent constructs
+- [ ] (myiam-cdk) Review lambda layer construction devex
+- [ ] (myiam-cdk) Implement test suite
+- [ ] (myiam-cdk) CI - Automatic test running
+- [ ] (myiam-cdk) Review README.md
+- [ ] (myiam-api) Enable dependabot
+- [ ] (myiam-api) Implement base test suite
+- [ ] (myiam-api) CI - Automatic test running
+- [ ] (myiam-api) CI - Automatic coverage publishing
+- [ ] (myiam-api) Implement RPC serialization: output
+- [ ] (myiam-api) Implement RPC serialization: input
+- [ ] (myiam-api) Implement RESTish serialization: output
+- [ ] (myiam-api) Implement RESTish serialization: input
+- [ ] (myiam-api) Type hints + mypy
+- [ ] (myiam-api) Review README.md
