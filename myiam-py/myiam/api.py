@@ -57,6 +57,10 @@ __all__ = (
     "list_routes",
     "create_route",
     "delete_route",
+    "list_resolvers",
+    "create_resolver",
+    "describe_resolver",
+    "delete_resolver",
     "convert_policy_statement_into_rules",
     "create_rule",
     "describe_rule",
@@ -407,6 +411,36 @@ def create_route(table, route_domain, route_spec, action):
 
 def delete_route(table, route_domain, route_spec):
     table.delete_item(Key={"pk": f"route_domain#{route_domain}", "sk": f"route_spec#{route_spec}"})
+
+
+# --------------------------------------------------------------------------------------------------
+# RESOLVERS
+# --------------------------------------------------------------------------------------------------
+
+def list_resolvers(table):
+    response = table.scan(FilterExpression=Attr("pk").begins_with("resolver#"))
+    return response["Items"]
+
+
+def create_resolver(table, request_key, action, resource):
+    table.put_item(
+        Item={
+            "pk": f"resolver#{request_key}",
+            "sk": "resolver#mapping",
+            "resource": resource,
+            "action": action,
+        },
+        ConditionExpression=Attr("pk").not_exists() & Attr("sk").not_exists(),
+    )
+
+
+def describe_resolver(table, request_key):
+    response = table.query(KeyConditionExpression=Key("pk").eq(f"resolver#{request_key}"))
+    return response.get("Items") or []
+
+
+def delete_resolver(table, request_key):
+    table.delete_item(Key={"pk": f"resolver#{request_key}", "sk": "resolver#mapping"})
 
 
 # --------------------------------------------------------------------------------------------------
