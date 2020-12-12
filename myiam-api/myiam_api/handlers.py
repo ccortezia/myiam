@@ -12,7 +12,8 @@ def create_user():
 
 
 def describe_user():
-    return ("Procedure not yet supported", 404)
+    records = myiam.describe_user(myiam_api.app.table, "ccortezia")
+    return [{"username": record["pk"].split("#")[-1]} for record in records]
 
 
 def update_user():
@@ -191,17 +192,17 @@ def delete_action():
     return ("Procedure not yet supported", 404)
 
 
-def list_routes():
-    return myiam.list_routes(myiam_api.app.table)
+def list_resolvers():
+    return myiam.list_resolvers(myiam_api.app.table)
 
 
-def create_route():
+def create_resolver():
     return ("Procedure not yet supported", 404)
 
 
-def update_route():
+def describe_resolver():
     return ("Procedure not yet supported", 404)
 
 
-def delete_route():
+def delete_resolver():
     return ("Procedure not yet supported", 404)

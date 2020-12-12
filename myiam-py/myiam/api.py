@@ -1,5 +1,3 @@
-import re
-import logging
 import itertools
 from boto3.dynamodb.conditions import Attr, Key
 
@@ -51,18 +49,15 @@ __all__ = (
     "describe_action",
     "update_action",
     "delete_action",
-    "create_route_domain",
-    "describe_route_domain",
-    "delete_route_domain",
-    "list_routes",
-    "create_route",
-    "delete_route",
+    "list_resolvers",
+    "create_resolver",
+    "describe_resolver",
+    "delete_resolver",
     "convert_policy_statement_into_rules",
     "create_rule",
     "describe_rule",
     "delete_rule",
     "delete_rules_by_sid",
-    "find_action_name_from_access_request",
     "find_policy_names_matching_user",
     "find_policy_names_matching_role",
     "find_evaluation_rules",
@@ -366,47 +361,33 @@ def delete_action(table, action_name):
 
 
 # --------------------------------------------------------------------------------------------------
-# ROUTES
+# RESOLVERS
 # --------------------------------------------------------------------------------------------------
 
-
-def create_route_domain(table, route_domain, **attrs):
-    table.put_item(
-        Item={"pk": f"route_domain#{route_domain}", "sk": "route_domain#attributes", **attrs},
-        ConditionExpression=Attr("pk").not_exists(),
-    )
-
-
-def describe_route_domain(table, route_domain):
-    response = table.query(KeyConditionExpression=Key("pk").eq(f"route_domain#{route_domain}"))
-    return response.get("Items") or []
-
-
-def delete_route_domain(table, route_domain):
-    response = table.query(KeyConditionExpression=Key("pk").eq(f"route_domain#{route_domain}"))
-    with table.batch_writer() as batch:
-        for pk, sk in [(item["pk"], item["sk"]) for item in response["Items"]]:
-            batch.delete_item(Key={"pk": pk, "sk": sk})
-
-
-def list_routes(table):
-    response = table.scan(FilterExpression=Attr("pk").begins_with("route_domain"))
+def list_resolvers(table):
+    response = table.scan(FilterExpression=Attr("pk").begins_with("resolver#"))
     return response["Items"]
 
 
-def create_route(table, route_domain, route_spec, action):
+def create_resolver(table, request_key, action, resource):
     table.put_item(
         Item={
-            "pk": f"route_domain#{route_domain}",
-            "sk": f"route_spec#{route_spec}",
+            "pk": f"resolver#{request_key}",
+            "sk": "resolver#mapping",
+            "resource": resource,
             "action": action,
         },
         ConditionExpression=Attr("pk").not_exists() & Attr("sk").not_exists(),
     )
 
 
-def delete_route(table, route_domain, route_spec):
-    table.delete_item(Key={"pk": f"route_domain#{route_domain}", "sk": f"route_spec#{route_spec}"})
+def describe_resolver(table, request_key):
+    response = table.query(KeyConditionExpression=Key("pk").eq(f"resolver#{request_key}"))
+    return response.get("Items") or []
+
+
+def delete_resolver(table, request_key):
+    table.delete_item(Key={"pk": f"resolver#{request_key}", "sk": "resolver#mapping"})
 
 
 # --------------------------------------------------------------------------------------------------
@@ -491,104 +472,6 @@ def delete_rule(table, policy_name, statement_id, rule_id):
 # --------------------------------------------------------------------------------------------------
 # EVALUATION
 # --------------------------------------------------------------------------------------------------
-
-
-class DefaultAccessRequestAdapter:
-    def __call__(self, access_request):
-        return dict(
-            http_method=access_request["http_method"], http_path=access_request["http_path"],
-        )
-
-
-class DefaultDomainReader:
-    def __call__(self, adapted_access_request):
-        return adapted_access_request["http_path"].lstrip("/").split("/")[0]
-
-
-class DefaultRouteLoader:
-    def __call__(self, datastore, route_domain):
-        items = describe_route_domain(datastore, route_domain)
-        if not items:
-            return None
-        return [
-            dict(
-                route_domain=route_domain,
-                route_spec=item["sk"].split("#")[1],
-                route_action=item["action"],
-            )
-            for item in items
-            if item["sk"].startswith("route_spec#")
-        ]
-
-
-class DefaultRouteAdapter:
-
-    spec_regex = re.compile(
-        r"^(?P<route_http_method_pattern>[^:]+):(?P<route_http_path_pattern>.+)$"
-    )
-
-    void_route = dict(route_http_method_pattern="", route_http_path_pattern="", route_action=None,)
-
-    def __call__(self, route_domain, route_spec, route_action):
-        m = re.match(self.spec_regex, route_spec)
-        if not m:
-            logging.getLogger("myiam").warning(f"unable to read {route_domain} {route_spec}")
-            return self.void_route
-        return dict(route_action=route_action, **m.groupdict())
-
-
-class DefaultRouteMatcher:
-    def __call__(self, adapted_access_request, adapted_route):
-
-        route_http_method_pattern = adapted_route["route_http_method_pattern"]
-        http_method = adapted_access_request["http_method"]
-        if not re.match(route_http_method_pattern, http_method):
-            return False
-
-        route_http_path_pattern = adapted_route["route_http_path_pattern"]
-        http_path = adapted_access_request["http_path"]
-        if not re.match(route_http_path_pattern, http_path):
-            return False
-
-        return True
-
-
-def find_action_name_from_access_request(
-    datastore,
-    access_request,
-    route_domain_reader=None,
-    route_loader=None,
-    access_request_adapter=None,
-    route_adapter=None,
-    route_matcher=None,
-):
-    # Install default strategies as needed.
-    route_domain_reader = route_domain_reader or DefaultDomainReader()
-    route_loader = route_loader or DefaultRouteLoader()
-    access_request_adapter = access_request_adapter or DefaultAccessRequestAdapter()
-    route_adapter = route_adapter or DefaultRouteAdapter()
-    route_matcher = route_matcher or DefaultRouteMatcher()
-
-    # Adapt access request data according to the active strategy.
-    adapted_access_request = access_request_adapter(access_request)
-
-    # Extract the route domain according to the active strategy.
-    route_domain = route_domain_reader(adapted_access_request)
-
-    # Load routes from the given datastore.
-    routes = route_loader(datastore, route_domain)
-
-    # Adapt loaded routes according to the active strategy.
-    adapted_routes = [route_adapter(**route) for route in routes]
-
-    # Attempt to match the access attempt to a loaded route.
-    for adapted_route in adapted_routes:
-        if route_matcher(adapted_access_request, adapted_route):
-            return adapted_route["route_action"]
-
-    # Give up in case a match is not found.
-    return None
-
 
 def find_policy_names_matching_user(table, user):
     # TODO: automatically add group policies group members (and mark the association

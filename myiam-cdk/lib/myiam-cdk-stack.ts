@@ -74,9 +74,16 @@ export class MyIamCdkStack extends cdk.Stack {
       ]
     })
 
+    const authorizerLayer = new lambda.LayerVersion(this, "MyIamApiAuthorizerLayer", {
+      layerVersionName: "myiam-authorizer",
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_8],
+      code: new lambda.AssetCode("resources/layers/authorizer/build/layer.zip")
+    })
+
     const authorizerLambda = new lambda.Function(this, "MyIamApiAuthorizerLambda", {
       functionName: "MyIamApiAuthorizerLambda",
       runtime: lambda.Runtime.PYTHON_3_8,
+      layers: [authorizerLayer],
       code: lambda.Code.fromAsset('resources/lambdas/authorizer'),
       handler: "handler.handle",
       initialPolicy: [

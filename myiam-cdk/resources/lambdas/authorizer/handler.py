@@ -1,7 +1,9 @@
+import re
 import json
 import boto3
 import myiam
 import logging
+import jsonpath_ng
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -30,40 +32,38 @@ def handle(event, context):
         return make_apig_authorizer_policy(event, "deny")
 
     # Step 3: tries to determine what action the caller wants to perform.
-    action_name = resolve_action(event)
+    action_name, resource_uri = resolve_action(event)
 
     if not action_name:
         logger.info("access denied: unable to resolve action name from request")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 4: tries to determine the resource the caller wants to access.
-    resource_name = resolve_resource(event)
-
-    if not resource_name:
-        logger.info("access denied: unable to resolve resource name from request")
+    if not resource_uri:
+        logger.info("access denied: unable to resolve resource uri from request")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 5: tries to determine what security policies applies to the caller.
+    # Step 4: tries to determine what security policies applies to the caller.
     policy_names = find_applicable_policies(event, principal, assumed_role)
 
     if not policy_names:
         logger.info("access denied: no applicable policies found")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 6: fetch indexed evaluation rules out of the applicable policy names.
-    evaluation_rules = find_rules(event, action_name, resource_name, policy_names)
+    # Step 5: fetch indexed evaluation rules out of the applicable policy names.
+    evaluation_rules = find_rules(event, action_name, resource_uri, policy_names)
 
     if not evaluation_rules:
         logger.info("access denied: no evaluation rules found")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 7: determines whether the access attempt should be allowed or not.
+    # Step 6: determines whether the access attempt should be allowed or not.
     evaluation_result = evaluate_access_attempt(event, evaluation_rules)
 
     logger.info(
         json.dumps(
             {
                 "action_name": action_name,
+                "resource_uri": resource_uri,
                 "assumed_role": assumed_role,
                 "applicable_policies": policy_names,
                 "evaluation_result": evaluation_result,
@@ -93,18 +93,24 @@ def resolve_action(event):
     request_context = event["requestContext"]
     http_method = request_context["httpMethod"]
     http_path = request_context["path"]
+    request_key = f"api:{http_method}:{http_path}"
 
-    return myiam.find_action_name_from_access_request(
-        datastore=ddbt,
-        access_request={"http_method": http_method, "http_path": http_path},
-        # TODO: properly infer domain to allow this lambda to protect other APIs
-        route_domain_reader=lambda _: "myiam",
-    )
+    for item in myiam.describe_resolver(ddbt, request_key):
+        if item["sk"] == "resolver#mapping":
+            action_name = item["action"]
+            resource = item["resource"]
+            break
 
+    for placeholder_slot_expr in re.findall(r"{([^}]+)}", resource):
+        # TODO: handle parsing exception.
+        expr = jsonpath_ng.parse(placeholder_slot_expr)
+        # TODO: handle void expr resolution.
+        # TODO: handle ambiguous expr resolution.
+        placeholder_slot = f"{{{placeholder_slot_expr}}}"
+        placeholder_value = expr.find(event)[0].value
+        resource = resource.replace(placeholder_slot, placeholder_value)
 
-def resolve_resource(event):
-    # TODO: implement resource resolution routine
-    return "unknown"
+    return action_name, resource
 
 
 def find_applicable_policies(event, principal, assumed_role):
@@ -117,7 +123,7 @@ def find_rules(event, action_name, resource_name, policy_names):
     return myiam.find_evaluation_rules(
         ddbt,
         action_name=action_name,
-        resource_name="unknown",
+        resource_name=resource_name,
         policy_names=policy_names,
         # TODO: implement context extraction to enable Policy conditions.
         context={},
