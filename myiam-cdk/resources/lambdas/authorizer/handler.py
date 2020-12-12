@@ -30,34 +30,31 @@ def handle(event, context):
         return make_apig_authorizer_policy(event, "deny")
 
     # Step 3: tries to determine what action the caller wants to perform.
-    action_name = resolve_action(event)
+    action_name, resource_uri = resolve_action_and_resource(event)
 
     if not action_name:
         logger.info("access denied: unable to resolve action name from request")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 4: tries to determine the resource the caller wants to access.
-    resource_name = resolve_resource(event)
-
-    if not resource_name:
-        logger.info("access denied: unable to resolve resource name from request")
+    if not resource_uri:
+        logger.info("access denied: unable to resolve resource uri from request")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 5: tries to determine what security policies applies to the caller.
+    # Step 4: tries to determine what security policies applies to the caller.
     policy_names = find_applicable_policies(event, principal, assumed_role)
 
     if not policy_names:
         logger.info("access denied: no applicable policies found")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 6: fetch indexed evaluation rules out of the applicable policy names.
-    evaluation_rules = find_rules(event, action_name, resource_name, policy_names)
+    # Step 5: fetch indexed evaluation rules out of the applicable policy names.
+    evaluation_rules = find_rules(event, action_name, resource_uri, policy_names)
 
     if not evaluation_rules:
         logger.info("access denied: no evaluation rules found")
         return make_apig_authorizer_policy(event, "deny")
 
-    # Step 7: determines whether the access attempt should be allowed or not.
+    # Step 6: determines whether the access attempt should be allowed or not.
     evaluation_result = evaluate_access_attempt(event, evaluation_rules)
 
     logger.info(
@@ -89,22 +86,15 @@ def resolve_role(event, principal):
     return event["headers"]["authorizer"]
 
 
-def resolve_action(event):
+def resolve_action_and_resource(event):
     request_context = event["requestContext"]
     http_method = request_context["httpMethod"]
     http_path = request_context["path"]
-
-    return myiam.find_action_name_from_access_request(
-        datastore=ddbt,
-        access_request={"http_method": http_method, "http_path": http_path},
-        # TODO: properly infer domain to allow this lambda to protect other APIs
-        route_domain_reader=lambda _: "myiam",
-    )
-
-
-def resolve_resource(event):
-    # TODO: implement resource resolution routine
-    return "unknown"
+    request_key = f"api:{http_method}:{http_path}"
+    for item in myiam.describe_resolver(ddbt, request_key):
+        if item["sk"] == "resolver#mapping":
+            return item["action"], item["resource"]
+    return None, None
 
 
 def find_applicable_policies(event, principal, assumed_role):
@@ -117,7 +107,7 @@ def find_rules(event, action_name, resource_name, policy_names):
     return myiam.find_evaluation_rules(
         ddbt,
         action_name=action_name,
-        resource_name="unknown",
+        resource_name=resource_name,
         policy_names=policy_names,
         # TODO: implement context extraction to enable Policy conditions.
         context={},

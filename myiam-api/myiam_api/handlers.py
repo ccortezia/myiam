@@ -191,17 +191,17 @@ def delete_action():
     return ("Procedure not yet supported", 404)
 
 
-def list_routes():
-    return myiam.list_routes(myiam_api.app.table)
+def list_resolvers():
+    return myiam.list_resolvers(myiam_api.app.table)
 
 
-def create_route():
+def create_resolver():
     return ("Procedure not yet supported", 404)
 
 
-def update_route():
+def describe_resolver():
     return ("Procedure not yet supported", 404)
 
 
-def delete_route():
+def delete_resolver():
     return ("Procedure not yet supported", 404)

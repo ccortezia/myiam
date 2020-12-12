@@ -8,32 +8,30 @@ import myiam
 HERE = pathlib.Path(__file__).parent
 
 
-@myiam_api.app.cli.command("reset_actions")
-def reset_actions():
+@myiam_api.app.cli.command("reset-resolvers")
+def reset_resolvers():
     logger = logging.getLogger("myiam_api").getChild("cli")
 
-    myiam.delete_route_domain(table=myiam_api.app.table, route_domain="myiam")
+    items = myiam.list_resolvers(table=myiam_api.app.table)
+    for item in items:
+        request_key = item["pk"].split("#")[-1]
+        logger.info(f"Deleting resolver {request_key}")
+        myiam.delete_resolver(table=myiam_api.app.table, request_key=request_key)
 
-    with open(HERE / "data/actions.yaml") as fp:
-        source_actions = yaml.safe_load(fp.read())
+    with open(HERE / "data/resolvers.yaml") as fp:
+        resolvers = yaml.safe_load(fp.read())
 
-    myiam.create_route_domain(
-        table=myiam_api.app.table,
-        route_domain="myiam",
-        description="MyIAM API action routes",
-    )
-
-    for item in source_actions:
-        logger.info("{route_spec} => {action}".format(**item))
-        myiam.create_route(
+    for resolver in resolvers:
+        logger.info("Setting resolver {request_key} => {action}".format(**resolver))
+        myiam.create_resolver(
             table=myiam_api.app.table,
-            route_domain="myiam",
-            route_spec=item["route_spec"],
-            action=item["action"],
+            request_key=resolver["request_key"],
+            resource=resolver["resource"],
+            action=resolver["action"],
         )
 
 
-@myiam_api.app.cli.command("reset_policies")
+@myiam_api.app.cli.command("reset-policies")
 def reset_policies():
     logger = logging.getLogger("myiam_api").getChild("cli")
 
@@ -54,7 +52,7 @@ def reset_policies():
         )
 
 
-@myiam_api.app.cli.command("reset_roles")
+@myiam_api.app.cli.command("reset-roles")
 def reset_roles():
     logger = logging.getLogger("myiam_api").getChild("cli")
 
