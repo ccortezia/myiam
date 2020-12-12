@@ -4,28 +4,13 @@ from myiam import (
     create_user,
     create_role,
     create_policy,
-    create_route_domain,
-    create_route,
     update_role_attach_policies,
     update_user_attach_policies,
-    find_action_name_from_access_request,
     find_policy_names_matching_user,
     find_policy_names_matching_role,
     find_evaluation_rules,
     calculate_allowance,
 )
-
-
-def test_find_action_name_from_access_request(ddbt):
-    create_route_domain(ddbt, "myiam", description="MyIAM API action routes")
-    create_route(ddbt, "myiam", "GET:/myiam/list_users", "myiam:ListUsers")
-    create_route(ddbt, "myiam", "GET:/myiam/describe_user", "myiam:DescribeUser")
-    http_request_data = {"http_method": "GET", "http_path": "/myiam/describe_user"}
-    action_name = find_action_name_from_access_request(ddbt, http_request_data)
-    assert action_name == "myiam:DescribeUser"
-    http_request_data = {"http_method": "GET", "http_path": "/myiam/unknown_operation"}
-    action_name = find_action_name_from_access_request(ddbt, http_request_data)
-    assert action_name is None
 
 
 def test_find_policy_names_matching_user(ddbt, generic_policy):
