@@ -1,7 +1,9 @@
+import re
 import json
 import boto3
 import myiam
 import logging
+import jsonpath_ng
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -30,7 +32,7 @@ def handle(event, context):
         return make_apig_authorizer_policy(event, "deny")
 
     # Step 3: tries to determine what action the caller wants to perform.
-    action_name, resource_uri = resolve_action_and_resource(event)
+    action_name, resource_uri = resolve_action(event)
 
     if not action_name:
         logger.info("access denied: unable to resolve action name from request")
@@ -61,6 +63,7 @@ def handle(event, context):
         json.dumps(
             {
                 "action_name": action_name,
+                "resource_uri": resource_uri,
                 "assumed_role": assumed_role,
                 "applicable_policies": policy_names,
                 "evaluation_result": evaluation_result,
@@ -86,15 +89,28 @@ def resolve_role(event, principal):
     return event["headers"]["authorizer"]
 
 
-def resolve_action_and_resource(event):
+def resolve_action(event):
     request_context = event["requestContext"]
     http_method = request_context["httpMethod"]
     http_path = request_context["path"]
     request_key = f"api:{http_method}:{http_path}"
+
     for item in myiam.describe_resolver(ddbt, request_key):
         if item["sk"] == "resolver#mapping":
-            return item["action"], item["resource"]
-    return None, None
+            action_name = item["action"]
+            resource = item["resource"]
+            break
+
+    for placeholder_slot_expr in re.findall(r"{([^}]+)}", resource):
+        # TODO: handle parsing exception.
+        expr = jsonpath_ng.parse(placeholder_slot_expr)
+        # TODO: handle void expr resolution.
+        # TODO: handle ambiguous expr resolution.
+        placeholder_slot = f"{{{placeholder_slot_expr}}}"
+        placeholder_value = expr.find(event)[0].value
+        resource = resource.replace(placeholder_slot, placeholder_value)
+
+    return action_name, resource
 
 
 def find_applicable_policies(event, principal, assumed_role):

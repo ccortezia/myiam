@@ -1,165 +1,165 @@
 - request_key: api:GET:/prod/1.0.0/list_users
-  resource: myiam
   action: myiam:ListUsers
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/create_user
-  resource: myiam
   action: myiam:CreateUser
+  resource: arn:myiam:users:{$.queryStringParameters.user_name}
 - request_key: api:GET:/prod/1.0.0/describe_user
-  resource: myiam
   action: myiam:DescribeUser
+  resource: arn:myiam:users:{$.queryStringParameters.user_name}
 - request_key: api:GET:/prod/1.0.0/update_user
-  resource: myiam
   action: myiam:UpdateUser
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_user_add_to_groups
-  resource: myiam
   action: myiam:UpdateUserAddToGroups
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_user_remove_from_groups
-  resource: myiam
   action: myiam:UpdateUserRemoveFromGroups
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_user_attach_policies
-  resource: myiam
   action: myiam:UpdateUserAttachPolicies
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_user_detach_policies
-  resource: myiam
   action: myiam:UpdateUserDetachPolicies
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_user_create_tag
-  resource: myiam
   action: myiam:UpdateUserCreateTag
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_user_update_tag
-  resource: myiam
   action: myiam:UpdateUserUpdateTag
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_user_delete_tag
-  resource: myiam
   action: myiam:UpdateUserDeleteTag
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_user
-  resource: myiam
   action: myiam:DeleteUser
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/list_groups
-  resource: myiam
   action: myiam:ListGroups
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/create_group
-  resource: myiam
   action: myiam:CreateGroup
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/describe_group
-  resource: myiam
   action: myiam:DescribeGroup
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group
-  resource: myiam
   action: myiam:UpdateGroup
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group_add_users
-  resource: myiam
   action: myiam:UpdateGroupAddUsers
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group_remove_users
-  resource: myiam
   action: myiam:UpdateGroupRemoveUsers
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group_attach_policies
-  resource: myiam
   action: myiam:UpdateGroupAttachPolicies
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group_detach_policies
-  resource: myiam
   action: myiam:UpdateGroupDetachPolicies
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group_create_inline_policy
-  resource: myiam
   action: myiam:UpdateGroupCreateInlinePolicy
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group_update_inline_policy
-  resource: myiam
   action: myiam:UpdateGroupUpdateInlinePolicy
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_group_delete_inline_policy
-  resource: myiam
   action: myiam:UpdateGroupDeleteInlinePolicy
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_group
-  resource: myiam
   action: myiam:DeleteGroup
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/list_roles
-  resource: myiam
   action: myiam:ListRoles
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/create_role
-  resource: myiam
   action: myiam:CreateRole
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/describe_role
-  resource: myiam
   action: myiam:DescribeRole
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role
-  resource: myiam
   action: myiam:UpdateRole
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role_attach_policies
-  resource: myiam
   action: myiam:UpdateRoleAttachPolicies
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role_detach_policies
-  resource: myiam
   action: myiam:UpdateRoleDetachPolicies
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role_trust_policy
-  resource: myiam
   action: myiam:UpdateRoleTrustPolicy
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role_permission_boundary
-  resource: myiam
   action: myiam:UpdateRolePermissionBoundary
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role_create_tag
-  resource: myiam
   action: myiam:UpdateRoleCreateTag
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role_update_tag
-  resource: myiam
   action: myiam:UpdateRoleUpdateTag
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_role_delete_tag
-  resource: myiam
   action: myiam:UpdateRoleDeleteTag
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_role
-  resource: myiam
   action: myiam:DeleteRole
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/list_policies
-  resource: myiam
   action: myiam:ListPolicies
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/create_policy
-  resource: myiam
   action: myiam:CreatePolicy
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/describe_policy
-  resource: myiam
   action: myiam:DescribePolicy
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_policy_set_default_version
-  resource: myiam
   action: myiam:UpdatePolicySetDefaultVersion
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_policy_version
-  resource: myiam
   action: myiam:DeletePolicyVersion
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_policy
-  resource: myiam
   action: myiam:DeletePolicy
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/list_actions
-  resource: myiam
   action: myiam:ListActions
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/create_action
-  resource: myiam
   action: myiam:CreateAction
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/describe_action
-  resource: myiam
   action: myiam:DescribeAction
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/update_action
-  resource: myiam
   action: myiam:UpdateAction
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_action
-  resource: myiam
   action: myiam:DeleteAction
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/list_resolvers
-  resource: myiam
   action: myiam:ListResolvers
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/create_resolver
-  resource: myiam
   action: myiam:CreateResolver
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/describe_resolver
-  resource: myiam
   action: myiam:DescribeResolver
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_resolver
-  resource: myiam
   action: myiam:DeleteResolver
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/create_rule
-  resource: myiam
   action: myiam:CreateRule
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/describe_rule
-  resource: myiam
   action: myiam:DescribeRule
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_rules_by_sid
-  resource: myiam
   action: myiam:DeleteRulesBySid
+  resource: "undefined"
 - request_key: api:GET:/prod/1.0.0/delete_rule
-  resource: myiam
   action: myiam:DeleteRule
+  resource: "undefined"

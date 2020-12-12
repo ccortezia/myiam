@@ -12,7 +12,8 @@ def create_user():
 
 
 def describe_user():
-    return ("Procedure not yet supported", 404)
+    records = myiam.describe_user(myiam_api.app.table, "ccortezia")
+    return [{"username": record["pk"].split("#")[-1]} for record in records]
 
 
 def update_user():

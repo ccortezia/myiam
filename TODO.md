@@ -10,7 +10,7 @@
 - [ ] (myiam-py) CI - Automatic coverage publishing
 - [ ] (myiam-py) Review README.md
 - [ ] (myiam-py) Rethink layers (outter OO layer?)
-- [ ] (myiam-py) Implement resource URI resolution
+- [x] (myiam-py) Implement resource URI resolution
 - [ ] (myiam-py) Refactor action resolution (strategy injection)
 - [ ] (myiam-py) Implement group policy inheritance to group members
 - [ ] (myiam-py) Implement policy conditions
