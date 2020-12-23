@@ -10,6 +10,8 @@ __all__ = (
     "update_user_remove_from_groups",
     "update_user_attach_policies",
     "update_user_detach_policies",
+    "update_user_inherit_group_policies",
+    "update_user_disinherit_group_policies",
     "update_user_create_tag",
     "update_user_update_tag",
     "update_user_delete_tag",
@@ -116,6 +118,21 @@ def update_user_detach_policies(table, user_name, policy_names):
     with table.batch_writer() as batch:
         for policy_name in policy_names:
             batch.delete_item(Key={"pk": f"user#{user_name}", "sk": f"policy#{policy_name}"})
+
+def update_user_inherit_group_policies(table, user_name, group_name, policy_names):
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.put_item(
+                Item={"pk": f"user#{user_name}", "sk": f"policy#group#{group_name}#{policy_name}"}
+            )
+
+
+def update_user_disinherit_group_policies(table, user_name, group_name, policy_names):
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.delete_item(
+                Key={"pk": f"user#{user_name}", "sk": f"policy#group#{group_name}#{policy_name}"}
+            )
 
 
 def update_user_create_tag(table, user_name, tag_name, tag_attrs):
@@ -478,13 +495,10 @@ def delete_rule(table, policy_name, statement_id, rule_id):
 # --------------------------------------------------------------------------------------------------
 
 def find_policy_names_matching_user(table, user):
-    # TODO: automatically add group policies group members (and mark the association
-    #  as special+indirect) so querying for user policies also returns policies
-    # indirectly associated with user from the groups he/she is associated.
     result = table.query(KeyConditionExpression=Key("pk").eq(f"user#{user}"))
     user_policies = result["Items"]
     policies = [
-        item["sk"].split("#")[1] for item in user_policies if item["sk"].startswith("policy#")
+        item["sk"].split("#")[-1] for item in user_policies if item["sk"].startswith("policy#")
     ]
     return sorted(set(policies))
 

@@ -12,7 +12,7 @@
 - [ ] (myiam-py) Rethink layers (outter OO layer?)
 - [x] (myiam-py) Implement resource URI resolution
 - [ ] (myiam-py) Refactor action resolution (strategy injection)
-- [ ] (myiam-py) Implement group policy inheritance to group members
+- [x] (myiam-py) Implement group policy inheritance to group members
 - [ ] (myiam-py) Implement policy conditions
 - [ ] (myiam-py) Review table.batch_writer usage
 - [ ] (myiam-py) Review table.update_item versus table.put_item usage

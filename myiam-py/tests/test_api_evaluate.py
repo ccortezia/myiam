@@ -2,10 +2,13 @@ import pytest
 from myiam import create_rule
 from myiam import (
     create_user,
+    create_group,
     create_role,
     create_policy,
+    update_group_add_users,
     update_role_attach_policies,
     update_user_attach_policies,
+    update_user_inherit_group_policies,
     find_policy_names_matching_user,
     find_policy_names_matching_role,
     find_evaluation_rules,
@@ -16,16 +19,18 @@ from myiam import (
 def test_find_policy_names_matching_user(ddbt, generic_policy):
     create_user(ddbt, user_name="joe")
     create_user(ddbt, user_name="ann")
+    create_group(ddbt, group_name="GroupA")
+    update_group_add_users(ddbt, group_name="GroupA", user_names=["joe"])
     create_policy(ddbt, policy_name="PolicyU", **generic_policy)
     create_policy(ddbt, policy_name="PolicyX", **generic_policy)
     create_policy(ddbt, policy_name="PolicyY", **generic_policy)
     create_policy(ddbt, policy_name="PolicyZ", **generic_policy)
+    create_policy(ddbt, policy_name="PolicyI", **generic_policy)
     update_user_attach_policies(ddbt, "joe", policy_names=["PolicyU", "PolicyZ"])
+    update_user_inherit_group_policies(ddbt, "joe", group_name="GroupA", policy_names=["PolicyI"])
     update_user_attach_policies(ddbt, "ann", policy_names=["PolicyY"])
-    policies = find_policy_names_matching_user(ddbt, "joe")
-    assert policies == ["PolicyU", "PolicyZ"]
-    policies = find_policy_names_matching_user(ddbt, "ann")
-    assert policies == ["PolicyY"]
+    assert find_policy_names_matching_user(ddbt, "joe") == ["PolicyI", "PolicyU", "PolicyZ"]
+    assert find_policy_names_matching_user(ddbt, "ann") == ["PolicyY"]
 
 
 def test_find_policy_names_matching_role(ddbt, generic_policy):

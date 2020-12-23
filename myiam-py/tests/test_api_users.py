@@ -7,6 +7,8 @@ from myiam.api import (
     update_user_remove_from_groups,
     update_user_attach_policies,
     update_user_detach_policies,
+    update_user_inherit_group_policies,
+    update_user_disinherit_group_policies,
     # update_user_create_tag,
     # update_user_update_tag,
     # update_user_delete_tag,
@@ -62,6 +64,36 @@ def test_update_user_detach_policies(ddbt):
     )
     update_user_detach_policies(
         ddbt, user_name="engineer", policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
+    )
+    user = describe_user(ddbt, user_name="engineer")
+    print(user)
+
+
+def test_update_user_inherit_group_policies(ddbt):
+    create_user(ddbt, user_name="engineer", human_name="Engineer")
+    update_user_inherit_group_policies(
+        ddbt,
+        user_name="engineer",
+        group_name="engineers",
+        policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
+    )
+    user = describe_user(ddbt, user_name="engineer")
+    print(user)
+
+
+def test_update_user_disinherit_group_policies(ddbt):
+    create_user(ddbt, user_name="engineer", human_name="Engineer")
+    update_user_inherit_group_policies(
+        ddbt,
+        user_name="engineer",
+        group_name="engineers",
+        policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
+    )
+    update_user_disinherit_group_policies(
+        ddbt,
+        user_name="engineer",
+        group_name="engineers",
+        policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
     )
     user = describe_user(ddbt, user_name="engineer")
     print(user)
