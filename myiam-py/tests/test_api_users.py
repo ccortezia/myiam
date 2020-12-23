@@ -60,10 +60,14 @@ def test_update_user_attach_policies(ddbt):
 def test_update_user_detach_policies(ddbt):
     create_user(ddbt, user_name="engineer", human_name="Engineer")
     update_user_attach_policies(
-        ddbt, user_name="engineer", policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
+        ddbt,
+        user_name="engineer",
+        policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
     )
     update_user_detach_policies(
-        ddbt, user_name="engineer", policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
+        ddbt,
+        user_name="engineer",
+        policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
     )
     user = describe_user(ddbt, user_name="engineer")
     print(user)

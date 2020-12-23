@@ -43,10 +43,14 @@ def test_update_role_attach_policies(ddbt):
 def test_update_role_detach_policies(ddbt):
     create_role(ddbt, role_name="engineer", human_name="Engineer")
     update_role_attach_policies(
-        ddbt, role_name="engineer", policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
+        ddbt,
+        role_name="engineer",
+        policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
     )
     update_role_detach_policies(
-        ddbt, role_name="engineer", policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
+        ddbt,
+        role_name="engineer",
+        policy_names=["ManageUsersReadOnly", "ManageDataAdmin"],
     )
     role = describe_role(ddbt, role_name="engineer")
     print(role)

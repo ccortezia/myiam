@@ -120,7 +120,10 @@ def update_user_attach_policies(table, user_name, policy_names):
 def update_user_detach_policies(table, user_name, policy_names):
     with table.batch_writer() as batch:
         for policy_name in policy_names:
-            batch.delete_item(Key={"pk": f"user#{user_name}", "sk": f"policy#{policy_name}"})
+            batch.delete_item(
+                Key={"pk": f"user#{user_name}", "sk": f"policy#user#self#{policy_name}"}
+            )
+
 
 def update_user_inherit_group_policies(table, user_name, group_name, policy_names):
     with table.batch_writer() as batch:
@@ -400,6 +403,7 @@ def delete_action(table, action_name):
 # RESOLVERS
 # --------------------------------------------------------------------------------------------------
 
+
 def list_resolvers(table):
     response = table.scan(FilterExpression=Attr("pk").begins_with("resolver#"))
     return response["Items"]
@@ -508,6 +512,7 @@ def delete_rule(table, policy_name, statement_id, rule_id):
 # --------------------------------------------------------------------------------------------------
 # EVALUATION
 # --------------------------------------------------------------------------------------------------
+
 
 def find_policy_names_matching_user(table, user):
     result = table.query(KeyConditionExpression=Key("pk").eq(f"user#{user}"))
