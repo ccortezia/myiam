@@ -42,6 +42,7 @@
 - [ ] (myiam-cdk) Review lambda layer construction devex
 - [ ] (myiam-cdk) Implement test suite
 - [ ] (myiam-cdk) CI - Automatic test running
+- [ ] (myiam-cdk) Eliminate race condition from group policy inheritance in stream handler
 - [ ] (myiam-cdk) Review README.md
 - [ ] (myiam-api) Enable dependabot
 - [ ] (myiam-api) Implement base test suite
