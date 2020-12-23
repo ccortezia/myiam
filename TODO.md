@@ -28,6 +28,9 @@
 - [ ] (myiam-py) Implement update_group_update_inline_policy
 - [ ] (myiam-py) Implement update_group_delete_inline_policy
 - [ ] (myiam-py) Implement update_role_permission_boundary
+- [ ] (myiam-py) Implement update_role_create_inline_policy
+- [ ] (myiam-py) Implement update_role_update_inline_policy
+- [ ] (myiam-py) Implement update_role_delete_inline_policy
 - [ ] (myiam-py) Implement update_role_create_tag
 - [ ] (myiam-py) Implement update_role_update_tag
 - [ ] (myiam-py) Implement update_role_delete_tag

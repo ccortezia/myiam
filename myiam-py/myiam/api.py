@@ -34,6 +34,9 @@ __all__ = (
     "update_role",
     "update_role_attach_policies",
     "update_role_detach_policies",
+    "update_role_create_inline_policy",
+    "update_role_update_inline_policy",
+    "update_role_delete_inline_policy",
     "update_role_trust_policy",
     "update_role_permission_boundary",
     "update_role_create_tag",
@@ -265,6 +268,18 @@ def update_role_detach_policies(table, role_name, policy_names):
     with table.batch_writer() as batch:
         for policy_name in policy_names:
             batch.delete_item(Key={"pk": f"role#{role_name}", "sk": f"policy#{policy_name}"})
+
+
+def update_role_create_inline_policy(table, role_name, policy_name, policy_attrs):
+    raise NotImplementedError()
+
+
+def update_role_update_inline_policy(table, role_name, policy_name, policy_attrs):
+    raise NotImplementedError()
+
+
+def update_role_delete_inline_policy(table, role_name, policy_name):
+    raise NotImplementedError()
 
 
 def update_role_trust_policy(table, role_name, policy_attrs):
