@@ -104,7 +104,7 @@ def update_user_add_to_groups(table, user_name, group_names):
 def update_user_remove_from_groups(table, user_name, group_names):
     # TODO: use write batch
     for group_name in group_names:
-        table.delete_item(Key={"pk": f"user#{user_name}", "sk": f"group#{group_name}"})
+        table.delete_item(Key={"pk": f"group#{group_name}", "sk": f"user#{user_name}"})
 
 
 def update_user_attach_policies(table, user_name, policy_names):
