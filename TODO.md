@@ -3,6 +3,7 @@
 - [ ] (proj) Add .github/PULL_REQUEST
 - [ ] (proj) Add "Getting Started" section to root README
 - [ ] (proj) Add "Contribute" section to root README
+- [ ] (proj) Add myiam-cli
 - [ ] (myiam-py) Add function docstrings
 - [ ] (myiam-py) Type hints + mypy
 - [ ] (myiam-py) Implement test suite assertions
@@ -11,7 +12,7 @@
 - [ ] (myiam-py) Review README.md
 - [ ] (myiam-py) Rethink layers (outter OO layer?)
 - [x] (myiam-py) Implement resource URI resolution
-- [ ] (myiam-py) Refactor action resolution (strategy injection)
+- [ ] (myiam-py) Move resolvers from Lambda authorizer to lib
 - [x] (myiam-py) Implement group policy inheritance to group members
 - [ ] (myiam-py) Implement policy conditions
 - [ ] (myiam-py) Review table.batch_writer usage
