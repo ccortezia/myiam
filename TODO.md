@@ -3,6 +3,7 @@
 - [ ] (proj) Add .github/PULL_REQUEST
 - [ ] (proj) Add "Getting Started" section to root README
 - [ ] (proj) Add "Contribute" section to root README
+- [ ] (proj) Add myiam-cli
 - [ ] (myiam-py) Add function docstrings
 - [ ] (myiam-py) Type hints + mypy
 - [ ] (myiam-py) Implement test suite assertions
@@ -11,8 +12,8 @@
 - [ ] (myiam-py) Review README.md
 - [ ] (myiam-py) Rethink layers (outter OO layer?)
 - [x] (myiam-py) Implement resource URI resolution
-- [ ] (myiam-py) Refactor action resolution (strategy injection)
-- [ ] (myiam-py) Implement group policy inheritance to group members
+- [ ] (myiam-py) Move resolvers from Lambda authorizer to lib
+- [x] (myiam-py) Implement group policy inheritance to group members
 - [ ] (myiam-py) Implement policy conditions
 - [ ] (myiam-py) Review table.batch_writer usage
 - [ ] (myiam-py) Review table.update_item versus table.put_item usage
@@ -22,12 +23,15 @@
 - [ ] (myiam-py) Implement update_user_create_tag
 - [ ] (myiam-py) Implement update_user_update_tag
 - [ ] (myiam-py) Implement update_user_delete_tag
-- [ ] (myiam-py) Implement update_group_attach_policies
-- [ ] (myiam-py) Implement update_group_detach_policies
+- [x] (myiam-py) Implement update_group_attach_policies
+- [x] (myiam-py) Implement update_group_detach_policies
 - [ ] (myiam-py) Implement update_group_create_inline_policy
 - [ ] (myiam-py) Implement update_group_update_inline_policy
 - [ ] (myiam-py) Implement update_group_delete_inline_policy
 - [ ] (myiam-py) Implement update_role_permission_boundary
+- [ ] (myiam-py) Implement update_role_create_inline_policy
+- [ ] (myiam-py) Implement update_role_update_inline_policy
+- [ ] (myiam-py) Implement update_role_delete_inline_policy
 - [ ] (myiam-py) Implement update_role_create_tag
 - [ ] (myiam-py) Implement update_role_update_tag
 - [ ] (myiam-py) Implement update_role_delete_tag
@@ -42,6 +46,7 @@
 - [ ] (myiam-cdk) Review lambda layer construction devex
 - [ ] (myiam-cdk) Implement test suite
 - [ ] (myiam-cdk) CI - Automatic test running
+- [ ] (myiam-cdk) Eliminate race condition from group policy inheritance in stream handler
 - [ ] (myiam-cdk) Review README.md
 - [ ] (myiam-api) Enable dependabot
 - [ ] (myiam-api) Implement base test suite

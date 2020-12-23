@@ -10,6 +10,8 @@ __all__ = (
     "update_user_remove_from_groups",
     "update_user_attach_policies",
     "update_user_detach_policies",
+    "update_user_inherit_group_policies",
+    "update_user_disinherit_group_policies",
     "update_user_create_tag",
     "update_user_update_tag",
     "update_user_delete_tag",
@@ -32,6 +34,9 @@ __all__ = (
     "update_role",
     "update_role_attach_policies",
     "update_role_detach_policies",
+    "update_role_create_inline_policy",
+    "update_role_update_inline_policy",
+    "update_role_delete_inline_policy",
     "update_role_trust_policy",
     "update_role_permission_boundary",
     "update_role_create_tag",
@@ -104,7 +109,7 @@ def update_user_add_to_groups(table, user_name, group_names):
 def update_user_remove_from_groups(table, user_name, group_names):
     # TODO: use write batch
     for group_name in group_names:
-        table.delete_item(Key={"pk": f"user#{user_name}", "sk": f"group#{group_name}"})
+        table.delete_item(Key={"pk": f"group#{group_name}", "sk": f"user#{user_name}"})
 
 
 def update_user_attach_policies(table, user_name, policy_names):
@@ -115,7 +120,25 @@ def update_user_attach_policies(table, user_name, policy_names):
 def update_user_detach_policies(table, user_name, policy_names):
     with table.batch_writer() as batch:
         for policy_name in policy_names:
-            batch.delete_item(Key={"pk": f"user#{user_name}", "sk": f"policy#{policy_name}"})
+            batch.delete_item(
+                Key={"pk": f"user#{user_name}", "sk": f"policy#user#self#{policy_name}"}
+            )
+
+
+def update_user_inherit_group_policies(table, user_name, group_name, policy_names):
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.put_item(
+                Item={"pk": f"user#{user_name}", "sk": f"policy#group#{group_name}#{policy_name}"}
+            )
+
+
+def update_user_disinherit_group_policies(table, user_name, group_name, policy_names):
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.delete_item(
+                Key={"pk": f"user#{user_name}", "sk": f"policy#group#{group_name}#{policy_name}"}
+            )
 
 
 def update_user_create_tag(table, user_name, tag_name, tag_attrs):
@@ -179,11 +202,15 @@ def update_group_remove_users(table, group_name, user_names):
 
 
 def update_group_attach_policies(table, group_name, policy_names):
-    raise NotImplementedError()
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.put_item(Item={"pk": f"group#{group_name}", "sk": f"policy#{policy_name}"})
 
 
 def update_group_detach_policies(table, group_name, policy_names):
-    raise NotImplementedError()
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.delete_item(Key={"pk": f"group#{group_name}", "sk": f"policy#{policy_name}"})
 
 
 def update_group_create_inline_policy(table, group_name, policy_name, policy_attrs):
@@ -244,6 +271,18 @@ def update_role_detach_policies(table, role_name, policy_names):
     with table.batch_writer() as batch:
         for policy_name in policy_names:
             batch.delete_item(Key={"pk": f"role#{role_name}", "sk": f"policy#{policy_name}"})
+
+
+def update_role_create_inline_policy(table, role_name, policy_name, policy_attrs):
+    raise NotImplementedError()
+
+
+def update_role_update_inline_policy(table, role_name, policy_name, policy_attrs):
+    raise NotImplementedError()
+
+
+def update_role_delete_inline_policy(table, role_name, policy_name):
+    raise NotImplementedError()
 
 
 def update_role_trust_policy(table, role_name, policy_attrs):
@@ -364,6 +403,7 @@ def delete_action(table, action_name):
 # RESOLVERS
 # --------------------------------------------------------------------------------------------------
 
+
 def list_resolvers(table):
     response = table.scan(FilterExpression=Attr("pk").begins_with("resolver#"))
     return response["Items"]
@@ -473,14 +513,12 @@ def delete_rule(table, policy_name, statement_id, rule_id):
 # EVALUATION
 # --------------------------------------------------------------------------------------------------
 
+
 def find_policy_names_matching_user(table, user):
-    # TODO: automatically add group policies group members (and mark the association
-    #  as special+indirect) so querying for user policies also returns policies
-    # indirectly associated with user from the groups he/she is associated.
     result = table.query(KeyConditionExpression=Key("pk").eq(f"user#{user}"))
     user_policies = result["Items"]
     policies = [
-        item["sk"].split("#")[1] for item in user_policies if item["sk"].startswith("policy#")
+        item["sk"].split("#")[-1] for item in user_policies if item["sk"].startswith("policy#")
     ]
     return sorted(set(policies))
 
