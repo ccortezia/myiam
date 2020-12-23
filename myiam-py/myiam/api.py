@@ -179,11 +179,15 @@ def update_group_remove_users(table, group_name, user_names):
 
 
 def update_group_attach_policies(table, group_name, policy_names):
-    raise NotImplementedError()
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.put_item(Item={"pk": f"group#{group_name}", "sk": f"policy#{policy_name}"})
 
 
 def update_group_detach_policies(table, group_name, policy_names):
-    raise NotImplementedError()
+    with table.batch_writer() as batch:
+        for policy_name in policy_names:
+            batch.delete_item(Key={"pk": f"group#{group_name}", "sk": f"policy#{policy_name}"})
 
 
 def update_group_create_inline_policy(table, group_name, policy_name, policy_attrs):

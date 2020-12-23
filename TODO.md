@@ -22,8 +22,8 @@
 - [ ] (myiam-py) Implement update_user_create_tag
 - [ ] (myiam-py) Implement update_user_update_tag
 - [ ] (myiam-py) Implement update_user_delete_tag
-- [ ] (myiam-py) Implement update_group_attach_policies
-- [ ] (myiam-py) Implement update_group_detach_policies
+- [x] (myiam-py) Implement update_group_attach_policies
+- [x] (myiam-py) Implement update_group_detach_policies
 - [ ] (myiam-py) Implement update_group_create_inline_policy
 - [ ] (myiam-py) Implement update_group_update_inline_policy
 - [ ] (myiam-py) Implement update_group_delete_inline_policy
