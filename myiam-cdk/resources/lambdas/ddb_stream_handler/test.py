@@ -220,3 +220,60 @@
 #         }
 #     ]
 # }
+
+
+# UPDATE POLICY SET DEFAULT VERSION
+# {
+#     "Records": [
+#         {
+#             "eventID": "f1876bb1a9f8deee9242721a35307c21",
+#             "eventName": "MODIFY",
+#             "eventVersion": "1.1",
+#             "eventSource": "aws:dynamodb",
+#             "awsRegion": "us-east-1",
+#             "dynamodb": {
+#                 "ApproximateCreationDateTime": 1608992548,
+#                 "Keys": {
+#                     "sk": {
+#                         "S": "policy#control"
+#                     },
+#                     "pk": {
+#                         "S": "policy#PolicyA"
+#                     }
+#                 },
+#                 "NewImage": {
+#                     "versions": {
+#                         "N": "2"
+#                     },
+#                     "default_version": {
+#                         "N": "1"
+#                     },
+#                     "sk": {
+#                         "S": "policy#control"
+#                     },
+#                     "pk": {
+#                         "S": "policy#PolicyA"
+#                     }
+#                 },
+#                 "OldImage": {
+#                     "versions": {
+#                         "N": "2"
+#                     },
+#                     "default_version": {
+#                         "N": "2"
+#                     },
+#                     "sk": {
+#                         "S": "policy#control"
+#                     },
+#                     "pk": {
+#                         "S": "policy#PolicyA"
+#                     }
+#                 },
+#                 "SequenceNumber": "304010400000000042909974419",
+#                 "SizeBytes": 150,
+#                 "StreamViewType": "NEW_AND_OLD_IMAGES"
+#             },
+#             "eventSourceARN": "arn:aws:dynamodb:us-east-1:583723262561:table/myiam/stream/2020-12-26T14:04:41.068"
+#         }
+#     ]
+# }

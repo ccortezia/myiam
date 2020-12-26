@@ -37,8 +37,8 @@ def generic_policy():
             {
                 "sid": "AllowReadData",
                 "effect": "allow",
-                "resources": "databases/sales",
-                "actions": "QueryData",
+                "resources": ["databases/sales"],
+                "actions": ["QueryData"],
             }
         ],
     )

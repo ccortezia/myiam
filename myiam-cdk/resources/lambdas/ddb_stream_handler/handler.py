@@ -26,68 +26,78 @@ def handle(event, context):
             message = json.dumps({"event": "USER_GROUP_POLICIES_DISINHERITED", "cleaned": cleaned})
             logger.info(message)
 
-        if _should_derive_policy_statement_rules(record):
-            rules = _derive_policy_statement_rules(record)
-            logger.info(json.dumps({"event": "RULES_DERIVED", "rules": rules}))
-
-        if _should_cleanup_policy_statement_rules(record):
-            rules = _cleanup_policy_statement_rules(record)
-            logger.info(json.dumps({"event": "RULES_REMOVED", "rules": rules}))
+        if _should_sync_policy_statement_rules(record):
+            new_rules, old_rules = _sync_policy_statement_rules(record)
+            logger.info(json.dumps({"event": "RULES_CREATED", "rules": new_rules}))
+            logger.info(json.dumps({"event": "RULES_REMOVED", "rules": old_rules}))
 
 
-def _should_derive_policy_statement_rules(record):
+def _should_sync_policy_statement_rules(record):
 
-    if record["eventName"] != "INSERT":
+    if record["eventName"] != "MODIFY":
         return False
 
     pk, sk = _get_pk_sk(record)
     is_policy_pk = pk.startswith("policy#")
-    is_statement_sk = sk.startswith("sid#")
-    is_rule_sk = sk.count("#") == 2
+    is_policy_control = sk == "policy#control"
+    new_version = record["dynamodb"]["NewImage"]["default_version"]["N"]
+    old_version = record["dynamodb"]["OldImage"]["default_version"]["N"]
+    default_policy_version_changed = new_version != old_version
 
-    return is_policy_pk and is_statement_sk and (not is_rule_sk)
+    return is_policy_pk and is_policy_control and default_policy_version_changed
 
 
-def _should_cleanup_policy_statement_rules(record):
+def _sync_policy_statement_rules(record):
 
-    if record["eventName"] != "REMOVE":
-        return False
+    new_rules = []
+    old_rules = []
 
     pk, sk = _get_pk_sk(record)
-    is_policy_pk = pk.startswith("policy#")
-    is_rule_sk = sk.count("#") == 2
+    policy_name = pk.split("#")[-1]
+    old_version = record["dynamodb"]["OldImage"]["default_version"]["N"]
+    new_version = record["dynamodb"]["NewImage"]["default_version"]["N"]
 
-    return is_policy_pk and (not is_rule_sk)
+    # TODO: research whether forced consistency must be used in this query, to avoid
+    # inconsistency in case this operation is performed too soon after the version update.
+    items = myiam.describe_policy(ddbt, policy_name=policy_name)
 
+    for policy_item in items:
 
-def _derive_policy_statement_rules(record):
+        # Ignore statement ids of policy versions that are not the latest default.
+        if not policy_item["sk"].startswith(f"sid@{new_version}"):
+            continue
 
-    # Convert statement into rules
-    rules = myiam.convert_policy_statement_into_rules(
-        {
-            "pk": record["dynamodb"]["NewImage"]["pk"]["S"],
-            "sk": record["dynamodb"]["NewImage"]["sk"]["S"],
-            "effect": record["dynamodb"]["NewImage"]["effect"]["S"],
-            "resources": [record["dynamodb"]["NewImage"]["resources"]["S"]],
-            "actions": [record["dynamodb"]["NewImage"]["actions"]["S"]],
-        }
-    )
+        # Convert statement into rules
+        new_rules = myiam.convert_policy_statement_into_rules(
+            {
+                "pk": policy_item["pk"],
+                "sk": policy_item["sk"],
+                "effect": policy_item["effect"],
+                "resources":  policy_item["resources"],
+                "actions":  policy_item["actions"],
+            }
+        )
 
-    # Insert new rules for statement
-    for rule in rules:
-        # TODO: handle ddbt.meta.client.exceptions.ConditionalCheckFailedException for
-        # uniqueness failures, to avoid crashing the streaming Lambda.
-        myiam.create_rule(ddbt, **rule)
+        # Insert new rules for statement
+        for rule in new_rules:
+            # TODO: handle ddbt.meta.client.exceptions.ConditionalCheckFailedException for
+            # uniqueness failures, to avoid crashing the streaming Lambda.
+            myiam.create_rule(ddbt, **rule)
 
-    return rules
+    # Set a flag to indicate the rules have been updated to match the latest version.
+    myiam.update_policy_control(ddbt, policy_name, rules_version=new_version)
+
+    # Cleanup deactivated rules respective to the deactivated policy version.
+    old_rules = myiam.delete_rules_by_policy_version(ddbt, policy_name, old_version)
+
+    return new_rules, old_rules
 
 
 def _cleanup_policy_statement_rules(record):
-    # Remove existing rules for statement.
     pk, sk = _get_pk_sk(record)
     policy_name = pk.split("#")[-1]
-    statement_id = sk.split("#")[-1]
-    rules = myiam.delete_rules_by_sid(ddbt, policy_name, statement_id)
+    old_version = record["dynamodb"]["OldImage"].get("default_version", {})["N"]
+    rules = myiam.delete_rules_by_policy_version(ddbt, policy_name, old_version)
     return rules
 
 

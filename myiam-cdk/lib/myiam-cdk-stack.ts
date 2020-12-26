@@ -4,6 +4,7 @@ import * as lambdaEventSources from "@aws-cdk/aws-lambda-event-sources"
 import * as dynamodb from "@aws-cdk/aws-dynamodb"
 import * as iam from "@aws-cdk/aws-iam"
 import * as apig from "@aws-cdk/aws-apigateway"
+import { Duration } from '@aws-cdk/core'
 
 export class MyIamCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -14,7 +15,7 @@ export class MyIamCdkStack extends cdk.Stack {
       partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "sk", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      stream: dynamodb.StreamViewType.NEW_IMAGE,
+      stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
@@ -37,11 +38,18 @@ export class MyIamCdkStack extends cdk.Stack {
       code: lambda.Code.fromAsset("resources/lambdas/ddb_stream_handler"),
       handler: "handler.handle",
       runtime: lambda.Runtime.PYTHON_3_8,
+      timeout: Duration.seconds(20),
       initialPolicy: [
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
           effect: iam.Effect.ALLOW,
-          actions: ["dynamodb:Query", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"],
+          actions: [
+            "dynamodb:Query",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem",
+            "dynamodb:BatchWriteItem"
+          ],
           resources: ["arn:aws:dynamodb:us-east-1:583723262561:table/myiam*"]
         })
       ]

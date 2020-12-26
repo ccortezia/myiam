@@ -33,5 +33,5 @@ def create_primary_table(dynamodb, table_name):
                 "ProvisionedThroughput": {"ReadCapacityUnits": 10, "WriteCapacityUnits": 10},
             },
         ],
-        StreamSpecification={"StreamEnabled": True, "StreamViewType": "NEW_IMAGE"},
+        StreamSpecification={"StreamEnabled": True, "StreamViewType": "NEW_AND_OLD_IMAGES"},
     )

@@ -9,32 +9,32 @@ from myiam import (
 
 
 def test_create_rule(ddbt):
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001", "db:FetchRows", "allow")
+    create_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001", "db:FetchRows", "allow")
 
 
 def test_describe_rule(ddbt):
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001", "db:FetchRows", "allow")
-    rule = describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001")
+    create_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001", "db:FetchRows", "allow")
+    rule = describe_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001")
     print(rule)
 
 
 def test_delete_rule(ddbt):
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001", "db:FetchRows", "allow")
-    delete_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001")
-    rule = describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001")
+    create_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001", "db:FetchRows", "allow")
+    delete_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001")
+    rule = describe_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001")
     print(rule)
 
 
 def test_delete_rules_by_sid(ddbt):
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001", "db:FetchRows", "allow")
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "002", "db:FetchRows", "deny")
-    create_rule(ddbt, "PolicyB", "ReadOnlyAccess", "001", "db:FetchRows", "deny")
-    delete_rules_by_sid(ddbt, "PolicyA", "ReadOnlyAccess")
-    rule = describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "001")
+    create_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001", "db:FetchRows", "allow")
+    create_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "002", "db:FetchRows", "deny")
+    create_rule(ddbt, "PolicyB", 1, "ReadOnlyAccess", "001", "db:FetchRows", "deny")
+    delete_rules_by_sid(ddbt, "PolicyA", 1, "ReadOnlyAccess")
+    rule = describe_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "001")
     print(rule)
-    rule = describe_rule(ddbt, "PolicyA", "ReadOnlyAccess", "002")
+    rule = describe_rule(ddbt, "PolicyA", 1, "ReadOnlyAccess", "002")
     print(rule)
-    rule = describe_rule(ddbt, "PolicyB", "ReadOnlyAccess", "001")
+    rule = describe_rule(ddbt, "PolicyB", 1, "ReadOnlyAccess", "001")
     print(rule)
 
 
@@ -44,7 +44,7 @@ def test_delete_rules_by_sid(ddbt):
         (
             {
                 "pk": "policy#PolicyA",
-                "sk": "sid#AllowReadData",
+                "sk": "sid@1#AllowReadData",
                 "effect": "allow",
                 "resources": ["databases/1"],
                 "actions": ["db:ReadData"],
@@ -52,6 +52,7 @@ def test_delete_rules_by_sid(ddbt):
             [
                 {
                     "policy_name": "PolicyA",
+                    "policy_version": 1,
                     "statement_id": "AllowReadData",
                     "rule_id": "0",
                     "action_name": "db:ReadData",
@@ -64,7 +65,7 @@ def test_delete_rules_by_sid(ddbt):
         (
             {
                 "pk": "policy#PolicyA",
-                "sk": "sid#AllowReadData",
+                "sk": "sid@1#AllowReadData",
                 "effect": "allow",
                 "resources": ["databases/1", "caches/*"],
                 "actions": ["db:ReadData"],
@@ -72,6 +73,7 @@ def test_delete_rules_by_sid(ddbt):
             [
                 {
                     "policy_name": "PolicyA",
+                    "policy_version": 1,
                     "statement_id": "AllowReadData",
                     "rule_id": "0",
                     "action_name": "db:ReadData",
@@ -81,6 +83,7 @@ def test_delete_rules_by_sid(ddbt):
                 },
                 {
                     "policy_name": "PolicyA",
+                    "policy_version": 1,
                     "statement_id": "AllowReadData",
                     "rule_id": "1",
                     "action_name": "db:ReadData",
@@ -93,7 +96,7 @@ def test_delete_rules_by_sid(ddbt):
         (
             {
                 "pk": "policy#PolicyA",
-                "sk": "sid#AllowAccessData",
+                "sk": "sid@1#AllowAccessData",
                 "effect": "allow",
                 "resources": ["databases/1", "caches/*"],
                 "actions": ["db:ReadData", "db:WriteData"],
@@ -101,6 +104,7 @@ def test_delete_rules_by_sid(ddbt):
             [
                 {
                     "policy_name": "PolicyA",
+                    "policy_version": 1,
                     "statement_id": "AllowAccessData",
                     "rule_id": "0",
                     "action_name": "db:ReadData",
@@ -110,6 +114,7 @@ def test_delete_rules_by_sid(ddbt):
                 },
                 {
                     "policy_name": "PolicyA",
+                    "policy_version": 1,
                     "statement_id": "AllowAccessData",
                     "rule_id": "1",
                     "action_name": "db:ReadData",
@@ -119,6 +124,7 @@ def test_delete_rules_by_sid(ddbt):
                 },
                 {
                     "policy_name": "PolicyA",
+                    "policy_version": 1,
                     "statement_id": "AllowAccessData",
                     "rule_id": "2",
                     "action_name": "db:WriteData",
@@ -128,6 +134,7 @@ def test_delete_rules_by_sid(ddbt):
                 },
                 {
                     "policy_name": "PolicyA",
+                    "policy_version": 1,
                     "statement_id": "AllowAccessData",
                     "rule_id": "3",
                     "action_name": "db:WriteData",

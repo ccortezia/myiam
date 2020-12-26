@@ -11,6 +11,7 @@
 - [ ] (myiam-py) CI - Automatic coverage publishing
 - [ ] (myiam-py) Review README.md
 - [ ] (myiam-py) Rethink layers (outter OO layer?)
+- [ ] (myiam-py) Prevent @ and : in statement ids
 - [x] (myiam-py) Implement resource URI resolution
 - [ ] (myiam-py) Move resolvers from Lambda authorizer to lib
 - [x] (myiam-py) Implement group policy inheritance to group members

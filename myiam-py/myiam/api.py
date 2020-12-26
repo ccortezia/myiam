@@ -1,3 +1,4 @@
+import re
 import itertools
 from boto3.dynamodb.conditions import Attr, Key
 
@@ -46,7 +47,9 @@ __all__ = (
     "list_policies",
     "create_policy",
     "describe_policy",
+    "update_policy_create_version",
     "update_policy_set_default_version",
+    "update_policy_control",
     "delete_policy_version",
     "delete_policy",
     "list_actions",
@@ -63,6 +66,7 @@ __all__ = (
     "describe_rule",
     "delete_rule",
     "delete_rules_by_sid",
+    "delete_rules_by_policy_version",
     "find_policy_names_matching_user",
     "find_policy_names_matching_role",
     "find_evaluation_rules",
@@ -324,19 +328,32 @@ def list_policies(table):
 
 def create_policy(table, policy_name, statements, **attrs):
     table.put_item(
-        Item={"pk": f"policy#{policy_name}", "sk": "policy#attributes", **attrs},
+        Item={
+            "pk": f"policy#{policy_name}",
+            "sk": "policy@1#attributes",
+            **attrs,
+        },
         ConditionExpression=Attr("pk").not_exists(),
     )
     for statement in statements:
         table.put_item(
             Item={
                 "pk": f"policy#{policy_name}",
-                "sk": f"sid#{statement['sid']}",
+                "sk": f"sid@1#{statement['sid']}",
                 "effect": statement["effect"],
                 "resources": statement["resources"],
                 "actions": statement["actions"],
             },
         )
+    table.put_item(
+        Item={
+            "pk": f"policy#{policy_name}",
+            "sk": "policy#control",
+            "default_version": 1,
+            "versions": 1,
+        },
+        ConditionExpression=Attr("sk").not_exists(),
+    )
 
 
 def describe_policy(table, policy_name):
@@ -344,9 +361,52 @@ def describe_policy(table, policy_name):
     return response.get("Items") or []
 
 
-def update_policy_set_default_version(table, policy_name, version_number):
-    # TODO: need to learn how to properly implement versioning
-    raise NotImplementedError()
+def update_policy_create_version(table, policy_name, statements, **attrs):
+    response = table.update_item(
+        Key={"pk": f"policy#{policy_name}", "sk": "policy#control"},
+        UpdateExpression="set versions = versions + :val",
+        ExpressionAttributeValues={":val": 1},
+        ReturnValues="UPDATED_NEW",
+    )
+    new_version = str(response["Attributes"]["versions"])
+    table.put_item(
+        Item={
+            "pk": f"policy#{policy_name}",
+            "sk": f"policy@{new_version}#attributes",
+            **attrs,
+        },
+        ConditionExpression=Attr("sk").not_exists(),
+    )
+    for statement in statements:
+        table.put_item(
+            Item={
+                "pk": f"policy#{policy_name}",
+                "sk": f"sid@{new_version}#{statement['sid']}",
+                "effect": statement["effect"],
+                "resources": statement["resources"],
+                "actions": statement["actions"],
+            },
+        )
+
+
+def update_policy_set_default_version(table, policy_name, policy_version):
+    table.update_item(
+        Key={"pk": f"policy#{policy_name}", "sk": "policy#control"},
+        UpdateExpression="set default_version = :new_version",
+        ExpressionAttributeValues={":new_version": policy_version},
+        ReturnValues="UPDATED_NEW",
+    )
+
+
+def update_policy_control(table, policy_name, **attrs):
+    expression = "set " + ", ".join([f"{attr_name} = :{attr_name}" for attr_name in attrs])
+    expression_values = {f":{attr_name}": attr_value for attr_name, attr_value in attrs.items()}
+    table.update_item(
+        Key={"pk": f"policy#{policy_name}", "sk": "policy#control"},
+        UpdateExpression=expression,
+        ExpressionAttributeValues=expression_values,
+        ReturnValues="UPDATED_NEW",
+    )
 
 
 def delete_policy_version(table, policy_name, version_number):
@@ -437,9 +497,18 @@ def delete_resolver(table, request_key):
 
 def convert_policy_statement_into_rules(statement_item):
     rules = []
+
+    # TODO: extract into separate routine for reuse
+    sid_regex = re.compile(r"sid@(?P<policy_version>\d+)#(?P<sid>[a-zA-Z]{1}[a-zA-Z0-9_]+)")
+    sid_match = sid_regex.match(statement_item["sk"])
+    if not sid_match:
+        raise RuntimeError("unable to determine sid and policy_version from statement item")
+    policy_version, statement_id = sid_match.groups()
+
     base = {
         "policy_name": statement_item["pk"].split("#")[1],
-        "statement_id": statement_item["sk"].split("#")[1],
+        "policy_version": int(policy_version),
+        "statement_id": statement_id,
         "effect": statement_item["effect"],
         # TODO: compile statement["condition"] into serialized python code
         "condition": None,
@@ -465,6 +534,7 @@ def convert_policy_statement_into_rules(statement_item):
 def create_rule(
     table,
     policy_name,
+    policy_version,
     statement_id,
     rule_id,
     action_name,
@@ -475,28 +545,27 @@ def create_rule(
     table.put_item(
         Item={
             "pk": f"policy#{policy_name}",
-            "sk": f"sid#{statement_id}#{rule_id}",
+            "sk": f"rule@{policy_version}#{statement_id}#{rule_id}",
             "rule_action": action_name,
             "rule_effect": effect,
             "rule_resource_spec": resource_spec,
             "rule_condition": None,
-        },
-        ConditionExpression=Attr("pk").not_exists(),
+        }
     )
 
 
-def describe_rule(table, policy_name, statement_id, rule_id):
+def describe_rule(table, policy_name, policy_version, statement_id, rule_id):
     response = table.query(
         KeyConditionExpression=Key("pk").eq(f"policy#{policy_name}")
-        & Key("sk").eq(f"sid#{statement_id}#{rule_id}")
+        & Key("sk").eq(f"rule@{policy_version}#{statement_id}#{rule_id}")
     )
     return response.get("Items") or []
 
 
-def delete_rules_by_sid(table, policy_name, statement_id):
+def delete_rules_by_sid(table, policy_name, policy_version, statement_id):
     response = table.query(
         KeyConditionExpression=Key("pk").eq(f"policy#{policy_name}")
-        & Key("sk").begins_with(f"sid#{statement_id}#")
+        & Key("sk").begins_with(f"rule@{policy_version}#{statement_id}#")
     )
     rules = response.get("Items") or []
     with table.batch_writer() as batch:
@@ -505,8 +574,26 @@ def delete_rules_by_sid(table, policy_name, statement_id):
     return rules
 
 
-def delete_rule(table, policy_name, statement_id, rule_id):
-    table.delete_item(Key={"pk": f"policy#{policy_name}", "sk": f"sid#{statement_id}#{rule_id}"})
+def delete_rules_by_policy_version(table, policy_name, policy_version):
+    response = table.query(
+        KeyConditionExpression=Key("pk").eq(f"policy#{policy_name}")
+        & Key("sk").begins_with(f"rule@{policy_version}#"),
+        FilterExpression=Attr("rule_action").exists()
+    )
+    rules = response.get("Items") or []
+    with table.batch_writer() as batch:
+        for rule in rules:
+            batch.delete_item(Key={"pk": rule["pk"], "sk": rule["sk"]})
+    return rules
+
+
+def delete_rule(table, policy_name, policy_version, statement_id, rule_id):
+    table.delete_item(
+        Key={
+            "pk": f"policy#{policy_name}",
+            "sk": f"rule@{policy_version}#{statement_id}#{rule_id}",
+        }
+    )
 
 
 # --------------------------------------------------------------------------------------------------
@@ -553,14 +640,14 @@ def find_evaluation_rules(table, action_name, resource_name, policy_names, conte
     result = table.query(
         IndexName="action_lookup",
         KeyConditionExpression=Key("rule_action").eq(action_name),
-        FilterExpression=Attr("pk").is_in(policy_keys),
+        FilterExpression=Attr("pk").is_in(policy_keys),  # TODO: verify rule matches policy version
     )
     action_scoped_items = result["Items"]
 
     result = table.query(
         IndexName="action_lookup",
         KeyConditionExpression=Key("rule_action").eq("*"),
-        FilterExpression=Attr("pk").is_in(policy_keys),
+        FilterExpression=Attr("pk").is_in(policy_keys),  # TODO: verify rule matches policy version
     )
     wildcard_unscoped_items = result["Items"]
 
