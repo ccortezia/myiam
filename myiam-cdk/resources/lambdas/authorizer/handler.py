@@ -100,6 +100,8 @@ def resolve_action(event):
             action_name = item["action"]
             resource = item["resource"]
             break
+    else:
+        return None, None
 
     for placeholder_slot_expr in re.findall(r"{([^}]+)}", resource):
         # TODO: handle parsing exception.

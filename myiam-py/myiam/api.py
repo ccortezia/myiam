@@ -1,3 +1,6 @@
+from collections import defaultdict
+from operator import itemgetter
+import hashlib
 import itertools
 from boto3.dynamodb.conditions import Attr, Key
 
@@ -323,20 +326,70 @@ def list_policies(table):
 
 
 def create_policy(table, policy_name, statements, **attrs):
+
+    # Calculats statement items from input.
+    st_items = [{
+        "pk": f"policy#{policy_name}",
+        "sk": f"sid#{st['sid']}",
+        "effect": st["effect"],
+        "resources": st["resources"],
+        "actions": st["actions"],
+    } for st in statements]
+
+    # Normalize statement items order.
+    st_items = sorted(st_items, key=itemgetter("pk", "sk"))
+
+    # Calculate action statement index.
+    # Example Index: {
+    #     "Action1": ["policy#PolicyB/sid#S1", "policy#PolicyB/sid#S5"],
+    #     "Action2": ["policy#PolicyB/sid#S6"],
+    # }
+    action_st_idx = defaultdict(list)
+    for st_item in st_items:
+        actions = st_item["actions"]
+        actions = {actions} if isinstance(actions, str) else set(actions)
+        for action in actions:
+            st_key = "{pk}/{sk}".format(**st_item)
+            action_st_idx[action].append(st_key)
+
+    # TODO: refactor signature verification code. Add test coverage.
+
+    # Calculate per-action statement signatures.
+    statement_signatures = defaultdict(hashlib.md5)
+    for action, st_keys in action_st_idx.items():
+        for st_key in st_keys:
+            st_key_encoded = st_key.encode("utf8")
+            statement_signatures[action].update(st_key_encoded)
+
+    # Transform per-action statement signatures to str.
+    # Example Signatures: {
+    #     "Action1": "md5:b86a468a5158487d1caec83601f32b97",
+    #     "Action2": "md5:1b36624db86b5aae71102626d1941508"
+    # }
+    statement_signatures = {
+        action: f"md5:{sign.hexdigest()}"
+        for action, sign in statement_signatures.items()
+    }
+
+    # Augment statement items so they carry per-action statement signatures.
+    for st_item in st_items:
+        actions = st_item["actions"]
+        st_item_actions = {actions} if isinstance(actions, str) else set(actions)
+        st_item["statement_signatures"] = {
+            action: signature
+            for action, signature in statement_signatures.items()
+            if action in st_item_actions
+        }
+
+    # Persist statement items.
+    for st_item in st_items:
+        table.put_item(Item=st_item)
+
+    # Persist policy attributes.
     table.put_item(
         Item={"pk": f"policy#{policy_name}", "sk": "policy#attributes", **attrs},
         ConditionExpression=Attr("pk").not_exists(),
     )
-    for statement in statements:
-        table.put_item(
-            Item={
-                "pk": f"policy#{policy_name}",
-                "sk": f"sid#{statement['sid']}",
-                "effect": statement["effect"],
-                "resources": statement["resources"],
-                "actions": statement["actions"],
-            },
-        )
 
 
 def describe_policy(table, policy_name):
@@ -438,13 +491,20 @@ def delete_resolver(table, request_key):
 def convert_policy_statement_into_rules(statement_item):
     rules = []
     base = {
+
+        # TODO: move these two steps into an "item-decoding" layer
         "policy_name": statement_item["pk"].split("#")[1],
         "statement_id": statement_item["sk"].split("#")[1],
+
         "effect": statement_item["effect"],
         # TODO: compile statement["condition"] into serialized python code
         "condition": None,
     }
     st_actions = statement_item["actions"]
+
+    # TODO: move this step into an "item-decoding" layer
+    statement_signatures = statement_item["statement_signatures"]
+
     # TODO: expand actions * wildcard from domain's action definitions
     st_resources = statement_item["resources"]
     product = itertools.product(st_actions, st_resources)
@@ -456,6 +516,7 @@ def convert_policy_statement_into_rules(statement_item):
                 "rule_id": str(rule_id),
                 "action_name": action_name,
                 "resource_spec": resource_spec,
+                "statement_signature": statement_signatures[action_name],
                 **base,
             }
         )
@@ -466,6 +527,7 @@ def create_rule(
     table,
     policy_name,
     statement_id,
+    statement_signature,
     rule_id,
     action_name,
     effect,
@@ -480,6 +542,7 @@ def create_rule(
             "rule_effect": effect,
             "rule_resource_spec": resource_spec,
             "rule_condition": None,
+            "statement_signature": statement_signature
         },
         ConditionExpression=Attr("pk").not_exists(),
     )
@@ -550,6 +613,7 @@ def find_evaluation_rules(table, action_name, resource_name, policy_names, conte
 
     policy_keys = [f"policy#{policy_name}" for policy_name in policy_names]
 
+    # Find applicable rules from input action.
     result = table.query(
         IndexName="action_lookup",
         KeyConditionExpression=Key("rule_action").eq(action_name),
@@ -564,7 +628,24 @@ def find_evaluation_rules(table, action_name, resource_name, policy_names, conte
     )
     wildcard_unscoped_items = result["Items"]
 
-    rules = action_scoped_items + wildcard_unscoped_items
+    fetched_rules = action_scoped_items + wildcard_unscoped_items
+
+    rules = []
+
+    # Validate rule-set integrity by matching propagated policy statement signatures.
+    # TODO: refactor signature verification code. Add test coverage.
+    for policy_pk, policy_rules in itertools.groupby(fetched_rules, key=itemgetter("pk")):
+        signature = hashlib.md5()
+        _rules = sorted(policy_rules, key=itemgetter("pk", "sk"))
+        for _rule in _rules:
+            sid_sk = "#".join(_rule["sk"].split("#")[:2])
+            signature.update(f"{policy_pk}/{sid_sk}".encode("utf8"))
+        calculated_signature = f"md5:{signature.hexdigest()}"
+        for _rule in _rules:
+            expected_signature = _rule["statement_signature"]
+            if calculated_signature == expected_signature:
+                rules.append(_rule)
+
     rules = [item for item in rules if _matches_resource_name(item, resource_name)]
     rules = [item for item in rules if _matches_predicate(item, context)]
     return rules
