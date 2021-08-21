@@ -1,3 +1,4 @@
+-r requirements.prod.txt
 pytest~=6.0
 pytest-cov~=2.0
 black==21.7b
