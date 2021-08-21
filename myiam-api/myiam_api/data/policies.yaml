@@ -4,3 +4,11 @@
       actions: "*"
       resources: "*"
       effect: allow
+- policy_name: UserReadAccess
+  statements:
+    - sid: AllowReadUsers
+      actions:
+        - myiam:DescribeUser
+        - myiam:ListUsers
+      resources: "*"
+      effect: allow

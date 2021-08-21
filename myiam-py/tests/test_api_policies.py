@@ -14,6 +14,12 @@ def test_create_policy(ddbt, generic_policy):
     print(policys)
 
 
+def test_create_multiaction_policy(ddbt, multiaction_policy):
+    create_policy(ddbt, policy_name="SalesDataReadWrite", **multiaction_policy)
+    policys = list_policies(ddbt)
+    print(policys)
+
+
 def test_describe_policy(ddbt, generic_policy):
     create_policy(ddbt, policy_name="SalesDataReadOnly", **generic_policy)
     policy = describe_policy(ddbt, policy_name="SalesDataReadOnly")

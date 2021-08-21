@@ -42,3 +42,18 @@ def generic_policy():
             }
         ],
     )
+
+
+@pytest.fixture
+def multiaction_policy():
+    return dict(
+        schema_version="1.0",
+        statements=[
+            {
+                "sid": "AllowCollaboration",
+                "effect": "allow",
+                "resources": "databases/sales",
+                "actions": ["WriteData", "QueryData"],
+            }
+        ],
+    )
