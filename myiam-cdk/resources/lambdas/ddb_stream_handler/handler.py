@@ -16,23 +16,31 @@ def handle(event, context):
     logger.info(json.dumps(event))
 
     for record in event["Records"]:
-        if _should_derive_user_group_policy_inheritance(record):
-            derived = _derive_user_group_policy_inheritance(record)
-            message = json.dumps({"event": "USER_GROUP_POLICIES_INHERITED", "derived": derived})
-            logger.info(message)
+        try:
+            _process_stream_record(record)
+        except Exception:
+            # TODO: improve blunt error handling to avoid table inconsistencies.
+            logger.exception("skipping stream record, unable to process")
 
-        if _should_cleanup_user_group_policy_inheritance(record):
-            cleaned = _cleanup_user_group_policy_inheritance(record)
-            message = json.dumps({"event": "USER_GROUP_POLICIES_DISINHERITED", "cleaned": cleaned})
-            logger.info(message)
 
-        if _should_derive_policy_statement_rules(record):
-            rules = _derive_policy_statement_rules(record)
-            logger.info(json.dumps({"event": "RULES_DERIVED", "rules": rules}))
+def _process_stream_record(record):
+    if _should_derive_user_group_policy_inheritance(record):
+        derived = _derive_user_group_policy_inheritance(record)
+        message = json.dumps({"event": "USER_GROUP_POLICIES_INHERITED", "derived": derived})
+        logger.info(message)
 
-        if _should_cleanup_policy_statement_rules(record):
-            rules = _cleanup_policy_statement_rules(record)
-            logger.info(json.dumps({"event": "RULES_REMOVED", "rules": rules}))
+    if _should_cleanup_user_group_policy_inheritance(record):
+        cleaned = _cleanup_user_group_policy_inheritance(record)
+        message = json.dumps({"event": "USER_GROUP_POLICIES_DISINHERITED", "cleaned": cleaned})
+        logger.info(message)
+
+    if _should_derive_policy_statement_rules(record):
+        rules = _derive_policy_statement_rules(record)
+        logger.info(json.dumps({"event": "RULES_DERIVED", "rules": rules}))
+
+    if _should_cleanup_policy_statement_rules(record):
+        rules = _cleanup_policy_statement_rules(record)
+        logger.info(json.dumps({"event": "RULES_REMOVED", "rules": rules}))
 
 
 def _should_derive_policy_statement_rules(record):
