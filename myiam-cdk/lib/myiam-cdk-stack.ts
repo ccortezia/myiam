@@ -9,6 +9,18 @@ export class MyIamCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
+    const sentryDsn = new cdk.CfnParameter(this, "sentryDsn", {
+      type: "String",
+      description: "The DSN of a Sentry project.",
+      default: ""
+    })
+
+    const sentryEnvironment = new cdk.CfnParameter(this, "sentryEnvironment", {
+      type: "String",
+      description: "The DSN of a Sentry project.",
+      default: ""
+    })
+
     const table = new dynamodb.Table(this, "MyIamDdbTable", {
       tableName: "myiam",
       partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
@@ -32,11 +44,19 @@ export class MyIamCdkStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     })
 
+    const sentryLayer = lambda.LayerVersion.fromLayerVersionArn(this, "SentryLayer",
+      "arn:aws:lambda:us-east-1:943013980633:layer:SentryPythonServerlessSDK:7")
+
     const streamHandler = new lambda.Function(this, "MyIamDdbStreamHandler", {
       functionName: "MyIamDdbStreamHandler",
       code: lambda.Code.fromAsset("resources/lambdas/ddb_stream_handler"),
       handler: "handler.handle",
       runtime: lambda.Runtime.PYTHON_3_8,
+      layers: [sentryLayer],
+      environment: {
+        SENTRY_DSN: sentryDsn.valueAsString,
+        SENTRY_ENVIRONMENT: sentryEnvironment.valueAsString,
+      },
       initialPolicy: [
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
