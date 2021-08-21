@@ -78,6 +78,10 @@ def _derive_policy_statement_rules(record):
             "effect": record["dynamodb"]["NewImage"]["effect"]["S"],
             "resources": [record["dynamodb"]["NewImage"]["resources"]["S"]],
             "actions": [record["dynamodb"]["NewImage"]["actions"]["S"]],
+            "statement_signatures": {
+                action_name: signature["S"] for action_name, signature in
+                record["dynamodb"]["NewImage"]["statement_signatures"]["M"].items()
+            }
         }
     )
 
