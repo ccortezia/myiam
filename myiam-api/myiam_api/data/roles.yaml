@@ -1,3 +1,6 @@
 - role_name: SystemAdministrator
   policy_names:
     - FullRootAccess
+- role_name: IdentityAdministrator
+  policy_names:
+    - UserReadAccess

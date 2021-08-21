@@ -90,14 +90,20 @@ def _should_cleanup_policy_statement_rules(record):
 
 def _derive_policy_statement_rules(record):
 
+    resources = [record["dynamodb"]["NewImage"]["resources"]]
+    resources = [resources["S"]] if resources.get("S") else [_["S"] for _ in resources["L"]]
+
+    actions = [record["dynamodb"]["NewImage"]["actions"]]
+    actions = [actions["S"]] if actions.get("S") else [_["S"] for _ in actions["L"]]
+
     # Convert statement into rules
     rules = myiam.convert_policy_statement_into_rules(
         {
             "pk": record["dynamodb"]["NewImage"]["pk"]["S"],
             "sk": record["dynamodb"]["NewImage"]["sk"]["S"],
             "effect": record["dynamodb"]["NewImage"]["effect"]["S"],
-            "resources": [record["dynamodb"]["NewImage"]["resources"]["S"]],
-            "actions": [record["dynamodb"]["NewImage"]["actions"]["S"]],
+            "resources": resources,
+            "actions": actions,
             "statement_signatures": {
                 action_name: signature["S"] for action_name, signature in
                 record["dynamodb"]["NewImage"]["statement_signatures"]["M"].items()
