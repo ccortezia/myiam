@@ -1,3 +1,4 @@
+# flake8: noqa
 import pytest
 from myiam.api import create_action, update_action, create_policy
 from .ddbs_utils import get_new_events
