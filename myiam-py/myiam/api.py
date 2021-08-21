@@ -328,13 +328,16 @@ def list_policies(table):
 def create_policy(table, policy_name, statements, **attrs):
 
     # Calculats statement items from input.
-    st_items = [{
-        "pk": f"policy#{policy_name}",
-        "sk": f"sid#{st['sid']}",
-        "effect": st["effect"],
-        "resources": st["resources"],
-        "actions": st["actions"],
-    } for st in statements]
+    st_items = [
+        {
+            "pk": f"policy#{policy_name}",
+            "sk": f"sid#{st['sid']}",
+            "effect": st["effect"],
+            "resources": st["resources"],
+            "actions": st["actions"],
+        }
+        for st in statements
+    ]
 
     # Normalize statement items order.
     st_items = sorted(st_items, key=itemgetter("pk", "sk"))
@@ -367,8 +370,7 @@ def create_policy(table, policy_name, statements, **attrs):
     #     "Action2": "md5:1b36624db86b5aae71102626d1941508"
     # }
     statement_signatures = {
-        action: f"md5:{sign.hexdigest()}"
-        for action, sign in statement_signatures.items()
+        action: f"md5:{sign.hexdigest()}" for action, sign in statement_signatures.items()
     }
 
     # Augment statement items so they carry per-action statement signatures.
@@ -491,11 +493,9 @@ def delete_resolver(table, request_key):
 def convert_policy_statement_into_rules(statement_item):
     rules = []
     base = {
-
         # TODO: move these two steps into an "item-decoding" layer
         "policy_name": statement_item["pk"].split("#")[1],
         "statement_id": statement_item["sk"].split("#")[1],
-
         "effect": statement_item["effect"],
         # TODO: compile statement["condition"] into serialized python code
         "condition": None,
@@ -542,7 +542,7 @@ def create_rule(
             "rule_effect": effect,
             "rule_resource_spec": resource_spec,
             "rule_condition": None,
-            "statement_signature": statement_signature
+            "statement_signature": statement_signature,
         },
         ConditionExpression=Attr("pk").not_exists(),
     )

@@ -49,10 +49,42 @@ def test_find_policy_names_matching_role(ddbt, generic_policy):
 
 
 def test_find_matching_rules(ddbt):
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "md5:bdacec346a79ffd3b03024701ea9c354", "001", "db:FetchRows", "allow")
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "md5:bdacec346a79ffd3b03024701ea9c354", "002", "db:FetchCells", "allow")
-    create_rule(ddbt, "PolicyA", "ReadOnlyAccess", "md5:bdacec346a79ffd3b03024701ea9c354", "003", "db:FetchSecret", "deny")
-    create_rule(ddbt, "PolicyB", "ReadOnlyAccess", "md5:e674b05fe5c165efb9ed2bf0618bf40d", "001", "db:FetchRows", "allow")
+    create_rule(
+        ddbt,
+        "PolicyA",
+        "ReadOnlyAccess",
+        "md5:bdacec346a79ffd3b03024701ea9c354",
+        "001",
+        "db:FetchRows",
+        "allow",
+    )
+    create_rule(
+        ddbt,
+        "PolicyA",
+        "ReadOnlyAccess",
+        "md5:bdacec346a79ffd3b03024701ea9c354",
+        "002",
+        "db:FetchCells",
+        "allow",
+    )
+    create_rule(
+        ddbt,
+        "PolicyA",
+        "ReadOnlyAccess",
+        "md5:bdacec346a79ffd3b03024701ea9c354",
+        "003",
+        "db:FetchSecret",
+        "deny",
+    )
+    create_rule(
+        ddbt,
+        "PolicyB",
+        "ReadOnlyAccess",
+        "md5:e674b05fe5c165efb9ed2bf0618bf40d",
+        "001",
+        "db:FetchRows",
+        "allow",
+    )
     create_rule(ddbt, "PolicyC", "ReadOnlyAccess", "-", "001", "db:FetchRows", "allow")
     create_rule(ddbt, "PolicyC", "*", "-", "001", "db:FetchRows", "allow")
     rules = find_evaluation_rules(ddbt, "db:FetchRows", "database/1", ["PolicyA", "PolicyB"], {})
