@@ -2,3 +2,5 @@ pytest~=6.0
 pytest-cov~=2.0
 black==21.7b
 flake8~=3.0
+boto3-stubs[dynamodb]~=1.18
+mypy==0.910
