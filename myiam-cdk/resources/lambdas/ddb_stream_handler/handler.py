@@ -90,10 +90,10 @@ def _should_cleanup_policy_statement_rules(record):
 
 def _derive_policy_statement_rules(record):
 
-    resources = [record["dynamodb"]["NewImage"]["resources"]]
+    resources = record["dynamodb"]["NewImage"]["resources"]
     resources = [resources["S"]] if resources.get("S") else [_["S"] for _ in resources["L"]]
 
-    actions = [record["dynamodb"]["NewImage"]["actions"]]
+    actions = record["dynamodb"]["NewImage"]["actions"]
     actions = [actions["S"]] if actions.get("S") else [_["S"] for _ in actions["L"]]
 
     # Convert statement into rules
