@@ -4,3 +4,6 @@
 - role_name: IdentityAdministrator
   policy_names:
     - UserReadAccess
+- role_name: SpecificIdentityAdministrator
+  policy_names:
+    - SpecificUserReadAccess
