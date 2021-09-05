@@ -12,3 +12,22 @@
         - myiam:ListUsers
       resources: "*"
       effect: allow
+- policy_name: SpecificUserReadAccess
+  statements:
+    - sid: AllowDescribeJoe
+      actions:
+        - myiam:DescribeUser
+      resources: myiam:user/joe
+      effect: allow
+    - sid: AllowDescribeMaryAndPhoebe
+      actions:
+        - myiam:DescribeUser
+      resources:
+        - myiam:user/division-1/mary
+        - myiam:user/division-1/phoebe
+      effect: allow
+    - sid: AllowDescribeDivision2
+      actions:
+        - myiam:DescribeUser
+      resources: myiam:user/division-2/*
+      effect: allow
