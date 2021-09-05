@@ -490,36 +490,53 @@ def delete_resolver(table, request_key):
 # --------------------------------------------------------------------------------------------------
 
 
-def convert_policy_statement_into_rules(statement_item):
+def _make_rules_from_policy_statement(policy_name, sid, effect, actions, resources):
     rules = []
-    base = {
-        # TODO: move these two steps into an "item-decoding" layer
-        "policy_name": statement_item["pk"].split("#")[1],
-        "statement_id": statement_item["sk"].split("#")[1],
-        "effect": statement_item["effect"],
-        # TODO: compile statement["condition"] into serialized python code
-        "condition": None,
-    }
-    st_actions = statement_item["actions"]
 
-    # TODO: move this step into an "item-decoding" layer
-    statement_signatures = statement_item["statement_signatures"]
+    actions = [actions] if isinstance(actions, str) else actions
+    resources = [resources] if isinstance(resources, str) else resources
 
     # TODO: expand actions * wildcard from domain's action definitions
-    st_resources = statement_item["resources"]
-    product = itertools.product(st_actions, st_resources)
+    product = itertools.product(actions, resources)
+
     for rule_id, (action_name, resource_spec) in enumerate(product):
-        # TODO: filter cartesian product according to action definitions
-        #  Must not create a rule for an action without resource correspondence.
+        # TODO: filter product according to action definitions
+        #  to avoid creating rules for an action without resource correspondence.
         rules.append(
             {
                 "rule_id": str(rule_id),
                 "action_name": action_name,
                 "resource_spec": resource_spec,
-                "statement_signature": statement_signatures[action_name],
-                **base,
+                "policy_name": policy_name,
+                "statement_id": sid,
+                "effect": effect,
+                "condition": None,
             }
         )
+
+    return rules
+
+
+def convert_policy_statement_into_rules(statement_item):
+
+    # TODO: move these two steps into an "item-decoding" layer
+    policy_name = statement_item["pk"].split("#")[1]
+    sid = statement_item["sk"].split("#")[1]
+
+    rules = _make_rules_from_policy_statement(
+        policy_name=policy_name,
+        sid=sid,
+        effect=statement_item["effect"],
+        actions=statement_item["actions"],
+        resources=statement_item["resources"],
+    )
+
+    # Sign rules to enable later statement integrity verification.
+    for rule in rules:
+        action_name = rule["action_name"]
+        statement_signatures = statement_item["statement_signatures"]
+        rule["statement_signature"] = statement_signatures[action_name]
+
     return rules
 
 
