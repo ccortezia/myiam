@@ -98,7 +98,8 @@ def resolve_action(event):
     for item in myiam.describe_resolver(ddbt, request_key):
         if item["sk"] == "resolver#mapping":
             action_name = item["action"]
-            resource = item["resource"]
+            # resource = item["resource"]  # TODO: implement dynamic resource resolution
+            resource = event["headers"]["resource"]
             break
     else:
         return None, None
