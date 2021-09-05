@@ -1,4 +1,6 @@
 from operator import itemgetter
+import functools
+import fnmatch
 import hashlib
 import itertools
 from boto3.dynamodb.conditions import Attr, Key
@@ -618,12 +620,6 @@ def find_evaluation_rules(table, action_name, resource_name, policy_names, conte
         # TODO: return predicate_fn(context)
         return True
 
-    def _matches_resource_name(item, resource_name):
-        if item["rule_resource_spec"] == "*":
-            return True
-        # TODO: calculate match between resource_name and rule_resource_spec
-        return True
-
     policy_keys = [f"policy#{policy_name}" for policy_name in policy_names]
 
     # Find applicable rules from input action.
@@ -653,7 +649,12 @@ def find_evaluation_rules(table, action_name, resource_name, policy_names, conte
         signature = _calculate_items_signature(items)
         _rules = [rule for rule in ruleset if signature == rule["statement_signature"]]
         rules.extend(_rules)
+
+    resource_matcher = functools.partial(fnmatch.fnmatch, resource_name)
+
+    rules = [item for item in rules if resource_matcher(item["rule_resource_spec"])]
     rules = [item for item in rules if _matches_predicate(item, context)]
+
     return rules
 
 
