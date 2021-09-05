@@ -1,4 +1,3 @@
-from collections import defaultdict
 from operator import itemgetter
 import hashlib
 import itertools
@@ -325,9 +324,40 @@ def list_policies(table):
     return response["Items"]
 
 
+def _make_policy_item_signatures(policy_name, statements):
+
+    # Derive rules eagerly to check policy sanity and to support signature calculation.
+    rules = []
+    for statement in statements:
+        rules.extend(_make_rules_from_policy_statement(policy_name, **statement))
+    rules = sorted(rules, key=itemgetter("action_name"))
+
+    statement_signatures = {}
+    for action_name, _rules in itertools.groupby(rules, key=itemgetter("action_name")):
+        items = [
+            {"pk": f"policy#{_rule['policy_name']}", "sk": f"sid#{_rule['statement_id']}"}
+            for _rule in _rules
+        ]
+        statement_signatures[action_name] = _calculate_items_signature(items)
+
+    return statement_signatures
+
+
 def create_policy(table, policy_name, statements, **attrs):
 
-    # Calculats statement items from input.
+    # Calculates the item signature map to support propagating decomposed statements.
+    # Since decomposed statements are not all made available for evaluation at the
+    # same time, these signatures are used for integrity check during evaluation.
+    # In practice, until all of the statement pieces for a policy are available in the
+    # evaluation index, then none of them is considered for evaluation.
+    #
+    # Example Signature Map: {
+    #     "Action1": "md5:b86a468a5158487d1caec83601f32b97",
+    #     "Action2": "md5:1b36624db86b5aae71102626d1941508"
+    # }
+    statement_signatures = _make_policy_item_signatures(policy_name, statements)
+
+    # Calculates statement items from input.
     st_items = [
         {
             "pk": f"policy#{policy_name}",
@@ -339,41 +369,7 @@ def create_policy(table, policy_name, statements, **attrs):
         for st in statements
     ]
 
-    # Normalize statement items order.
-    st_items = sorted(st_items, key=itemgetter("pk", "sk"))
-
-    # Calculate action statement index.
-    # Example Index: {
-    #     "Action1": ["policy#PolicyB/sid#S1", "policy#PolicyB/sid#S5"],
-    #     "Action2": ["policy#PolicyB/sid#S6"],
-    # }
-    action_st_idx = defaultdict(list)
-    for st_item in st_items:
-        actions = st_item["actions"]
-        actions = {actions} if isinstance(actions, str) else set(actions)
-        for action in actions:
-            st_key = "{pk}/{sk}".format(**st_item)
-            action_st_idx[action].append(st_key)
-
-    # TODO: refactor signature verification code. Add test coverage.
-
-    # Calculate per-action statement signatures.
-    statement_signatures = defaultdict(hashlib.md5)
-    for action, st_keys in action_st_idx.items():
-        for st_key in st_keys:
-            st_key_encoded = st_key.encode("utf8")
-            statement_signatures[action].update(st_key_encoded)
-
-    # Transform per-action statement signatures to str.
-    # Example Signatures: {
-    #     "Action1": "md5:b86a468a5158487d1caec83601f32b97",
-    #     "Action2": "md5:1b36624db86b5aae71102626d1941508"
-    # }
-    statement_signatures = {
-        action: f"md5:{sign.hexdigest()}" for action, sign in statement_signatures.items()
-    }
-
-    # Augment statement items so they carry per-action statement signatures.
+    # Augment statement items with statement-relevant signatures.
     for st_item in st_items:
         actions = st_item["actions"]
         st_item_actions = {actions} if isinstance(actions, str) else set(actions)
@@ -650,22 +646,22 @@ def find_evaluation_rules(table, action_name, resource_name, policy_names, conte
     rules = []
 
     # Validate rule-set integrity by matching propagated policy statement signatures.
-    # TODO: refactor signature verification code. Add test coverage.
-    for policy_pk, policy_rules in itertools.groupby(fetched_rules, key=itemgetter("pk")):
-        signature = hashlib.md5()
-        _rules = sorted(policy_rules, key=itemgetter("pk", "sk"))
-        for _rule in _rules:
-            sid_sk = "#".join(_rule["sk"].split("#")[:2])
-            signature.update(f"{policy_pk}/{sid_sk}".encode("utf8"))
-        calculated_signature = f"md5:{signature.hexdigest()}"
-        for _rule in _rules:
-            expected_signature = _rule["statement_signature"]
-            if calculated_signature == expected_signature:
-                rules.append(_rule)
-
-    rules = [item for item in rules if _matches_resource_name(item, resource_name)]
+    fetched_rules = sorted(fetched_rules, key=itemgetter("pk"))
+    for policy_pk, ruleset in itertools.groupby(fetched_rules, key=itemgetter("pk")):
+        ruleset = list(ruleset)
+        items = [{"pk": rule["pk"], "sk": "#".join(rule["sk"].split("#")[:2])} for rule in ruleset]
+        signature = _calculate_items_signature(items)
+        _rules = [rule for rule in ruleset if signature == rule["statement_signature"]]
+        rules.extend(_rules)
     rules = [item for item in rules if _matches_predicate(item, context)]
     return rules
+
+
+def _calculate_items_signature(items):
+    signature = hashlib.md5()
+    for item in sorted(items, key=itemgetter("pk", "sk")):
+        signature.update("{pk}/{sk}".format(**item).encode("utf8"))
+    return f"md5:{signature.hexdigest()}"
 
 
 def calculate_allowance(table, effects):
