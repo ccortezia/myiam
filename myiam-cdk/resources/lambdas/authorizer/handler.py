@@ -3,7 +3,29 @@ import json
 import boto3
 import myiam
 import logging
+import functools
 import jsonpath_ng
+import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
+
+
+sentry_sdk.init(
+    traces_sample_rate=1.0,
+    integrations=[
+        LoggingIntegration(level=logging.INFO, event_level=logging.WARNING),
+        AwsLambdaIntegration(timeout_warning=True),
+    ]
+)
+
+
+def sentry_traced(fn):
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        with sentry_sdk.start_span(op=fn.__name__):
+            return fn(*args, **kwargs)
+    return wrapper
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -78,17 +100,20 @@ def handle(event, context):
 # ------------------------------------------------------------------------------
 
 
+@sentry_traced
 def resolve_principal(event):
     # TODO: implement once authentication mechanism is in place.
     return "someone"
 
 
+@sentry_traced
 def resolve_role(event, principal):
     # NOTE: real authorization token resolution is not yet performed.
     # Instead, the assumed role is naively resolved out of the header.
     return event["headers"]["authorizer"]
 
 
+@sentry_traced
 def resolve_action(event):
     request_context = event["requestContext"]
     http_method = request_context["httpMethod"]
@@ -116,12 +141,14 @@ def resolve_action(event):
     return action_name, resource
 
 
+@sentry_traced
 def find_applicable_policies(event, principal, assumed_role):
     # TODO: capture applicable policies directly associated to principal
     # TODO: capture applicable policies indirectly associated to principal (groups)
     return myiam.find_policy_names_matching_role(ddbt, assumed_role)
 
 
+@sentry_traced
 def find_rules(event, action_name, resource_name, policy_names):
     return myiam.find_evaluation_rules(
         ddbt,
@@ -133,6 +160,7 @@ def find_rules(event, action_name, resource_name, policy_names):
     )
 
 
+@sentry_traced
 def evaluate_access_attempt(event, evaluation_rules):
     # TODO: enrich calculation process and emit debugging information.
     return myiam.calculate_allowance(ddbt, [_["rule_effect"] for _ in evaluation_rules])
