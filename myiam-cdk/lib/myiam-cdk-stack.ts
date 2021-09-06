@@ -83,7 +83,12 @@ export class MyIamCdkStack extends cdk.Stack {
       code: lambda.Code.fromAsset("resources/lambdas/api"),
       handler: "handler.handle",
       runtime: lambda.Runtime.PYTHON_3_8,
-      layers: [apiLayer],
+      tracing: lambda.Tracing.ACTIVE,
+      layers: [apiLayer, sentryLayer],
+      environment: {
+        SENTRY_DSN: sentryDsn.valueAsString,
+        SENTRY_ENVIRONMENT: sentryEnvironment.valueAsString,
+      },
       initialPolicy: [
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
@@ -103,9 +108,14 @@ export class MyIamCdkStack extends cdk.Stack {
     const authorizerLambda = new lambda.Function(this, "MyIamApiAuthorizerLambda", {
       functionName: "MyIamApiAuthorizerLambda",
       runtime: lambda.Runtime.PYTHON_3_8,
-      layers: [authorizerLayer],
+      tracing: lambda.Tracing.ACTIVE,
+      layers: [authorizerLayer, sentryLayer],
       code: lambda.Code.fromAsset('resources/lambdas/authorizer'),
       handler: "handler.handle",
+      environment: {
+        SENTRY_DSN: sentryDsn.valueAsString,
+        SENTRY_ENVIRONMENT: sentryEnvironment.valueAsString,
+      },
       initialPolicy: [
         new iam.PolicyStatement({
           sid: "AllowLambdaToQueryDynamoDbTable",
@@ -125,6 +135,9 @@ export class MyIamCdkStack extends cdk.Stack {
 
     const api = new apig.LambdaRestApi(this, "MyIamRestApi", {
       handler: apiHandler,
+      deployOptions: {
+        tracingEnabled: true
+      },
       defaultMethodOptions: {
         authorizationType: apig.AuthorizationType.CUSTOM,
         authorizer
